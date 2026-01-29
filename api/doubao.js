@@ -1,17 +1,17 @@
 export default async function handler(req, res) {
-    // 1. 添加 CORS 响应头，允许跨域访问
+    // 1. 设置跨域头，允许来自任何地方的调用
     res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*'); // 在生产环境中建议改为具体的域名
+    res.setHeader('Access-Control-Allow-Origin', '*'); 
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
 
-    // 2. 处理浏览器预检请求 (OPTIONS)
+    // 2. 关键：处理浏览器的预检请求 (OPTIONS)
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
     }
 
-    // 3. 限制仅允许 POST 请求
+    // 3. 验证是否为 POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -26,16 +26,8 @@ export default async function handler(req, res) {
             body: JSON.stringify(req.body)
         });
 
-        const text = await response.text();
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch {
-            data = { raw: text };
-        }
-
+        const data = await response.json();
         res.status(response.status).json(data);
-
     } catch (err) {
         res.status(500).json({ error: "Server error", detail: err.message });
     }
