@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI客诉应对助手 </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+        }
+
+        body {
+            font-family: 'Inter', "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .input-focus:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .img-container {
+            position: relative;
+            display: inline-block;
+        }
+        .img-remove {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 640px) {
+            .container { padding-left: 1rem; padding-right: 1rem; }
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8">
+    <div class="max-w-6xl mx-auto px-4">
+        <!-- 头部导航 -->
+        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">AI 客诉应对助手</h1>
+                <p class="text-slate-500 mt-1 text-sm">已接入豆包 Doubao-1.8 大模型，支持多模态证据分析</p>
+安全部：李川；存在疑问通过企业微信联系我
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="statusIndicator" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-xs font-medium text-slate-600">
+                    <div class="w-2 h-2 rounded-full bg-green-500" id="statusDot"></div>
+                    <span id="statusText">准备就绪</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- 左侧：输入区域 -->
+            <div class="lg:col-span-5 space-y-6">
+                <section class="glass-panel p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg font-bold text-sm">1</span>
+                        <h2 class="font-semibold text-slate-800">投诉详情输入</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">企业类型</label>
+                                <select id="corpType" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm input-focus transition-all">
+                                    <option>食品生产企业</option>
+                                    <option>餐饮门店</option>
+                                    <option>食品贸易/经销</option>
+                                    <option>仓储物流/冷链</option>
+                                    <option>其他</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">投诉人类型</label>
+                                <select id="complainantType" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm input-focus transition-all">
+                                    <option>普通消费者</option>
+                                    <option>疑似职业打假/恶意高赔</option>
+                                    <option>渠道客户/经销商</option>
+                                    <option>平台/媒体/监管转办</option>
+                                    <option>其他</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1 text-red-500">客诉描述（事实+诉求）*</label>
+                            <textarea id="facts" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm min-h-[120px] input-focus transition-all" placeholder="请详细描述事实，例如：发生时间、涉及批次、具体异物描述、沟通现状及对方诉求..."></textarea>
+                            <div class="mt-2 flex justify-between">
+                                <span class="text-[10px] text-slate-400 italic">建议要素：时间+批次+问题+诉求+现状</span>
+                                <button onclick="fillStandardExample()" class="text-[11px] text-blue-600 hover:underline">填入标准案例</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">升级情况</label>
+                            <select id="escalation" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm input-focus transition-all">
+                                <option value="未升级">未升级（内部处理中）</option>
+                                <option value="平台介入">已升级至电商平台/三方平台</option>
+                                <option value="监管介入">已升级至市监局/消协</option>
+                                <option value="媒体介入">已引发媒体关注/社交平台曝光</option>
+                            </select>
+                        </div>
+
+                        <div class="pt-2">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">附件证据 (支持图片/PDF)</label>
+                            <div class="relative">
+                                <input type="file" id="fileInput" multiple class="hidden" accept="image/*,application/pdf">
+                                <button onclick="document.getElementById('fileInput').click()" class="w-full border-2 border-dashed border-slate-200 rounded-xl py-6 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 transition-colors group">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-400 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span class="text-sm text-slate-500" id="fileCountText">点击或拖拽上传附件</span>
+                                </button>
+                            </div>
+                            <div id="filePreview" class="mt-2 flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex flex-wrap gap-2">
+                        <button id="btnPlan" class="flex-1 min-w-[140px] bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                            <span>生成内部思路</span>
+                        </button>
+                        <button id="btnReply" class="flex-1 min-w-[140px] border border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                            <span>生成对外答复</span>
+                        </button>
+                    </div>
+                </section>
+
+                <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl">
+                    <h4 class="text-xs font-bold text-amber-800 uppercase flex items-center gap-1 mb-1">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                        合规提醒
+                    </h4>
+                    <p class="text-xs text-amber-700 leading-relaxed">
+                        本工具基于ai分析事件模型。仅供内部风控参考，正式对外函件建议经法务审核。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 右侧：输出区域 -->
+            <div class="lg:col-span-7 space-y-6">
+                <!-- 内部思路板块 -->
+                <section class="glass-panel rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[350px]">
+                    <div class="bg-slate-900 px-6 py-3 border-bottom border-slate-800 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-white text-sm">应对思路 (对内)</h3>
+                            <span class="px-2 py-0.5 rounded bg-slate-700 text-[10px] font-bold text-slate-300 uppercase">Internal Only</span>
+                        </div>
+                        <button onclick="copyToClipboard('outPlan')" class="text-xs text-slate-400 hover:text-white font-medium">复制内容</button>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <div id="outPlan" class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed custom-scrollbar overflow-y-auto max-h-[500px] flex-grow" data-placeholder="点击左侧按钮开始生成应对思路..."></div>
+                    </div>
+                </section>
+
+                <!-- 对外回复板块 -->
+                <section class="glass-panel rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[250px]">
+                    <div class="bg-blue-600 px-6 py-3 border-bottom border-blue-700 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-white text-sm">答复函 (对外)</h3>
+                            <span class="px-2 py-0.5 rounded bg-blue-500 text-[10px] font-bold text-blue-100 uppercase">External Use</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="copyToClipboard('outReply')" class="text-xs text-blue-100 hover:text-white font-medium">复制内容</button>
+                            <button id="btnExport" class="text-xs text-blue-100 hover:text-white font-medium">导出文件</button>
+                        </div>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <div id="outReply" class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed custom-scrollbar overflow-y-auto max-h-[400px] flex-grow" data-placeholder="应对思路生成后，可生成正式对外答复函..."></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗：消息通知 -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-2xl bg-slate-900 text-white text-sm font-medium transform translate-y-20 opacity-0 transition-all duration-300"></div>
+
+    <script>
+        /** =========================
+         * ① 核心配置：已更新为您的豆包接入信息
+         * ========================= */
+        const API_KEY = "4bcbe285-c162-4c7d-905c-941a3b030ba5";
+        const VOLC_ENDPOINT = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
+        const MODEL_ID = "ep-m-20260129125546-l8qvt"; 
+
+        let uploadedImages = []; // 存储 base64 用于多模态调用
+
+        // 初始化
+        window.onload = () => {
+            initPlaceholder();
+            setupEventListeners();
+        };
+
+        function fillStandardExample() {
+            const example = "【时间】：2024年1月15日\n【涉及产品】：批次为231102的‘经典原味饼干’\n【客诉事实】：顾客反馈在堂食过程中于产品中发现黑色异物（疑似2cm长硬质塑料片），称其小孩吞食后出现呕吐感，但拒绝提供医院诊断证明，仅提供一张异物在包装盒内的模糊照片。\n【诉求】：要求按《食安法》赔偿1000元并退款，威胁若不处理将投诉至市监局并在社交平台曝光。\n【沟通现状】：客服已初步致电慰问并提出赠送50元无门槛券，被对方激烈拒绝。";
+            document.getElementById('facts').value = example;
+        }
+
+        function initPlaceholder() {
+            document.querySelectorAll('[data-placeholder]').forEach(el => {
+                if (!el.textContent.trim()) {
+                    el.innerHTML = `<span class="text-slate-400 italic">${el.dataset.placeholder}</span>`;
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            const fileInput = document.getElementById('fileInput');
+            fileInput.onchange = handleFileSelect;
+
+            document.getElementById('btnPlan').onclick = () => generateTask('PLAN');
+            document.getElementById('btnReply').onclick = () => generateTask('REPLY');
+            document.getElementById('btnExport').onclick = exportToDoc;
+        }
+
+        /** =========================
+         * ② 文件处理与预览
+         * ========================= */
+        async function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            for (let file of files) {
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast(`文件 ${file.name} 过大，请上传10MB以内的文件`, 'error');
+                    continue;
+                }
+                const base64 = await toBase64(file);
+                uploadedImages.push(base64);
+            }
+            renderImagePreviews();
+        }
+
+        function renderImagePreviews() {
+            const preview = document.getElementById('filePreview');
+            preview.innerHTML = '';
+            uploadedImages.forEach((base64, index) => {
+                const container = document.createElement('div');
+                container.className = 'img-container w-12 h-12 rounded-lg border border-slate-200 bg-cover bg-center';
+                container.style.backgroundImage = `url(${base64})`;
+                
+                const removeBtn = document.createElement('div');
+                removeBtn.className = 'img-remove';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    uploadedImages.splice(index, 1);
+                    renderImagePreviews();
+                };
+                
+                container.appendChild(removeBtn);
+                preview.appendChild(container);
+            });
+            document.getElementById('fileCountText').innerText = uploadedImages.length > 0 ? `已加载 ${uploadedImages.length} 个附件` : '点击上传证据图片';
+        }
+
+        /** =========================
+         * ③ 核心 API 调用：兼容豆包多模态返回
+         * ========================= */
+        async function callGemini(prompt, attachments = []) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 95000); 
+
+            try {
+                const messages = [
+                    { role: "system", content: "你是一个深耕食品安全法律与企业风控的专家。你的回复必须专业、合规，基于中国《食品安全法》和《消保法》。请仔细识别图片附件中的异物细节、包装日期、标签瑕疵等关键证据并结合到研判中。" }
+                ];
+
+                // 多模态处理：豆包规范
+                if (attachments && attachments.length > 0) {
+                    const content = [{ type: "text", text: prompt }];
+                    attachments.forEach(base64 => {
+                        content.push({
+                            type: "image_url",
+                            image_url: { url: base64, detail: "high" }
+                        });
+                    });
+                    messages.push({ role: "user", content: content });
+                } else {
+                    messages.push({ role: "user", content: prompt });
+                }
+
+                const response = await fetch(VOLC_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_ID,
+                        messages: messages,
+                        temperature: 0.4,
+                        max_tokens: 4000,
+                        stream: false
+                    }),
+                    signal: controller.signal
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(`API 错误: ${err.error?.message || response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // 【修复核心】：处理豆包返回的 content 为字符串或数组的情况
+                const rawContent = data.choices[0].message.content;
+                if (typeof rawContent === 'string') return rawContent;
+                if (Array.isArray(rawContent)) {
+                    return rawContent.filter(item => item.type === 'text').map(item => item.text).join("");
+                }
+                
+                return "模型返回了无法解析的格式。";
+            } catch (error) {
+                console.error("API Call Error:", error);
+                throw error;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        async function generateTask(type) {
+            const facts = document.getElementById('facts').value.trim();
+            if (!facts) {
+                showToast('请先输入客诉描述', 'warning');
+                return;
+            }
+
+            updateUIState(true, '豆包研判中...');
+            const outPlan = document.getElementById('outPlan');
+            const outReply = document.getElementById('outReply');
+
+            try {
+                let prompt = "";
+                if (type === 'PLAN') {
+                    const corp = document.getElementById('corpType').value;
+                    const user = document.getElementById('complainantType').value;
+                    const esc = document.getElementById('escalation').value;
+                    prompt = `【企业背景】：${corp}\n【投诉人画像】：${user}\n【客诉现状】：${esc}\n【事实描述】：${facts}\n\n【任务】：请生成内部深度应对思路。包含：1.性质判定(普通消费者/职业打假)及理由；2.法律抗辩要点(瑕疵vs缺陷)；3.证据完善建议；4.赔付策略及谈判口径红线。`;
+                    outPlan.textContent = "正在调动视觉能力识别证据并生成策略...";
+                    const res = await callGemini(prompt, uploadedImages);
+                    outPlan.textContent = res;
+                } else if (type === 'REPLY') {
+                    const planContent = outPlan.innerText;
+                    if (planContent.length < 20) {
+                        showToast('建议先生成“应对思路”', 'warning');
+                    }
+                    prompt = `【原始投诉】：${facts}\n【内部策略】：${planContent}\n\n【任务】：起草正式对外答复函。语气专业克制，不随意承认违规责任，明确核查时限。`;
+                    outReply.textContent = "正在起草正式公文...";
+                    const res = await callGemini(prompt, uploadedImages);
+                    outReply.textContent = res;
+                }
+                showToast('生成成功', 'success');
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                updateUIState(false);
+            }
+        }
+
+        /** ============ 辅助工具 ============ */
+        function updateUIState(isBusy, text = '就绪') {
+            const statusText = document.getElementById('statusText');
+            const statusDot = document.getElementById('statusDot');
+            const btns = ['btnPlan', 'btnReply'];
+            
+            statusText.textContent = text;
+            if (isBusy) {
+                statusDot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-pulse';
+                btns.forEach(id => document.getElementById(id).disabled = true);
+            } else {
+                statusDot.className = 'w-2 h-2 rounded-full bg-green-500';
+                btns.forEach(id => document.getElementById(id).disabled = false);
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-2xl text-white text-sm font-medium transform transition-all duration-300 opacity-100 translate-y-0`;
+            if (type === 'error') t.classList.add('bg-red-600');
+            else if (type === 'success') t.classList.add('bg-green-600');
+            else if (type === 'warning') t.classList.add('bg-amber-600');
+            else t.classList.add('bg-slate-900');
+            setTimeout(() => { t.classList.replace('translate-y-0', 'translate-y-20'); t.classList.replace('opacity-100', 'opacity-0'); }, 3000);
+        }
+
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function copyToClipboard(id) {
+            const text = document.getElementById(id).innerText;
+            if (text.length < 5) return;
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showToast('已复制到剪贴板', 'success');
+        }
+
+        function exportToDoc() {
+            const content = document.getElementById('outReply').innerText;
+            if (content.length < 20) return;
+            const blob = new Blob(['\ufeff' + content], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `客诉答复函_${new Date().toLocaleDateString()}.doc`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('文件已导出', 'success');
+        }
+    </script>
+</body>
+</html>
