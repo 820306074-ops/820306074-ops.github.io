@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI客诉应对助手 - 稳定增强版</title>
+    <title>AI客诉应对助手</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -62,6 +62,16 @@
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        /* 呼吸灯效果优化 */
+        .status-pulse {
+            animation: pulse-blue 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-blue {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(1.2); }
+        }
     </style>
 </head>
 <body class="min-h-screen py-8">
@@ -69,12 +79,12 @@
         <!-- 头部导航 -->
         <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">AI 客诉应对助手</h1>
-                <p class="text-slate-500 mt-1 text-sm">已接入豆包 Doubao-1.8 大模型 | 深度赋能食品风控研判</p>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">AI 客诉应对助手 <span class="text-blue-600 text-sm font-normal ml-2">专业深度版</span></h1>
+                <p class="text-slate-500 mt-1 text-sm">已接入豆包 Doubao-1.8 | 增强型风控模型 | 移除响应限时，确保完整生成</p>
                 <p class="text-[10px] text-slate-400 mt-1">安全部：李川；存在疑问通过企业微信联系我</p>
             </div>
             <div class="flex items-center gap-3">
-                <div id="statusIndicator" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-xs font-medium text-slate-600">
+                <div id="statusIndicator" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-xs font-medium text-slate-600 border border-slate-200">
                     <div class="w-2 h-2 rounded-full bg-green-500" id="statusDot"></div>
                     <span id="statusText">准备就绪</span>
                 </div>
@@ -116,7 +126,7 @@
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 uppercase mb-1 text-red-500">客诉描述（事实+诉求）*</label>
-                            <textarea id="facts" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm min-h-[120px] input-focus transition-all" placeholder="请详细描述事实，例如：发生时间、涉及批次、具体异物描述、沟通现状及对方诉求..."></textarea>
+                            <textarea id="facts" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm min-h-[120px] input-focus transition-all" placeholder="请详细描述：发生时间、涉及批次、具体问题细节、沟通现状及对方诉求..."></textarea>
                             <div class="mt-2 flex justify-between">
                                 <span class="text-[10px] text-slate-400 italic">建议要素：时间+批次+问题+诉求+现状</span>
                                 <button onclick="fillStandardExample()" class="text-[11px] text-blue-600 hover:underline">填入标准案例</button>
@@ -134,7 +144,7 @@
                         </div>
 
                         <div class="pt-2">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">附件证据 (若上传则开启图像识别)</label>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">附件证据 (若上传则开启多模态研判)</label>
                             <div class="relative">
                                 <input type="file" id="fileInput" multiple class="hidden" accept="image/*">
                                 <button onclick="document.getElementById('fileInput').click()" class="w-full border-2 border-dashed border-slate-200 rounded-xl py-6 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 transition-colors group">
@@ -150,18 +160,24 @@
 
                     <div class="mt-6 flex flex-wrap gap-2">
                         <button id="btnPlan" class="flex-1 min-w-[140px] bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                            <span>生成内部思路</span>
+                            <span>深度生成策略</span>
                         </button>
                         <button id="btnReply" class="flex-1 min-w-[140px] border border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                            <span>生成对外答复</span>
+                            <span>起草专业答复</span>
                         </button>
                     </div>
                 </section>
 
-                <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl">
-                    <h4 class="text-xs font-bold text-amber-800 uppercase flex items-center gap-1 mb-1">合规与风险提示</h4>
+                <!-- 合规与风险提示 -->
+                <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl shadow-sm">
+                    <div class="flex items-center gap-2 mb-1">
+                        <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        <h4 class="text-xs font-bold text-amber-800 uppercase">合规与风险提示</h4>
+                    </div>
                     <p class="text-xs text-amber-700 leading-relaxed">
-                        本助手生成内容仅供内部处理投诉提供思路参考，不可直接作为正式结论。如需起草对外答复函件或涉及法律赔偿，请务必联系法务部门进行最终审核。
+                        本助手生成内容仅供内部处理投诉提供思路参考，不可直接作为正式结论。如需对外起草正式答复函件或涉及大额赔偿，<strong>请务必联系法务部门进行最终核准</strong>。
                     </p>
                 </div>
             </div>
@@ -169,33 +185,33 @@
             <!-- 右侧：输出区域 -->
             <div class="lg:col-span-7 space-y-6">
                 <!-- 内部思路板块 -->
-                <section class="glass-panel rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[350px]">
+                <section class="glass-panel rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[400px]">
                     <div class="bg-slate-900 px-6 py-3 flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-white text-sm">应对思路 (对内)</h3>
+                            <h3 class="font-bold text-white text-sm">深度研判思路 (对内)</h3>
                             <span id="modeTag" class="px-2 py-0.5 rounded bg-slate-700 text-[10px] font-bold text-slate-300 uppercase">等待指令</span>
                         </div>
-                        <button onclick="copyToClipboard('outPlan')" class="text-xs text-slate-400 hover:text-white font-medium">复制内容</button>
+                        <button onclick="copyToClipboard('outPlan')" class="text-xs text-slate-400 hover:text-white font-medium">复制策略</button>
                     </div>
                     <div class="p-6 flex-grow flex flex-col">
-                        <div id="outPlan" class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed custom-scrollbar overflow-y-auto max-h-[500px] flex-grow" data-placeholder="点击左侧按钮开始生成应对思路..."></div>
+                        <div id="outPlan" class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed custom-scrollbar overflow-y-auto max-h-[600px] flex-grow" data-placeholder="点击左侧按钮开始生成深度研判报告..."></div>
                     </div>
                 </section>
 
                 <!-- 对外回复板块 -->
-                <section class="glass-panel rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[250px]">
-                    <div class="bg-blue-600 px-6 py-3 flex items-center justify-between">
+                <section class="glass-panel rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[300px]">
+                    <div class="bg-blue-600 px-6 py-3 flex items-center justify-between border-b border-blue-500">
                         <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-white text-sm">答复函 (对外)</h3>
+                            <h3 class="font-bold text-white text-sm">正式答复函 (对外)</h3>
                             <span class="px-2 py-0.5 rounded bg-blue-500 text-[10px] font-bold text-blue-100 uppercase">EXTERNAL</span>
                         </div>
                         <div class="flex gap-3">
-                            <button onclick="copyToClipboard('outReply')" class="text-xs text-blue-100 hover:text-white font-medium">复制内容</button>
-                            <button id="btnExport" class="text-xs text-blue-100 hover:text-white font-medium">导出文件</button>
+                            <button onclick="copyToClipboard('outReply')" class="text-xs text-blue-100 hover:text-white font-medium">复制全文</button>
+                            <button id="btnExport" class="text-xs text-blue-100 hover:text-white font-medium">导出 Word</button>
                         </div>
                     </div>
                     <div class="p-6 flex-grow flex flex-col">
-                        <div id="outReply" class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed custom-scrollbar overflow-y-auto max-h-[400px] flex-grow" data-placeholder="应对思路生成后，可生成正式对外答复函..."></div>
+                        <div id="outReply" class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed custom-scrollbar overflow-y-auto max-h-[400px] flex-grow" data-placeholder="策略生成后，可一键转化起草正式对外函件..."></div>
                     </div>
                 </section>
             </div>
@@ -221,7 +237,7 @@
         };
 
         function fillStandardExample() {
-            const example = "【时间】：2024年1月15日\n【涉及产品】：批次为231102的‘经典原味饼干’\n【客诉事实】：顾客反馈在产品中发现黑色异物（疑似2cm长硬质塑料片），称其小孩吞食后不适，但拒绝提供医院诊断，仅提供一张照片。\n【诉求】：要求赔偿1000元并退款。\n【沟通现状】：客服提出补偿50元券，被拒绝。";
+            const example = "【时间】：2024年1月15日\n【涉及产品】：批次为231102的‘经典原味饼干’\n【客诉事实】：顾客反馈在产品中发现黑色异物（疑似2cm长硬质塑料片），称其小孩吞食后不适，仅提供一张照片且背景模糊，拒绝退回实物检测。\n【诉求】：要求赔偿1000元并退款，否则投诉到市监局并公开曝光。\n【沟通现状】：客服致电提出补偿50元券，被拒绝。";
             document.getElementById('facts').value = example;
         }
 
@@ -241,14 +257,11 @@
             document.getElementById('btnExport').onclick = exportToDoc;
         }
 
-        /** =========================
-         * ② 文件处理
-         * ========================= */
         async function handleFileSelect(e) {
             const files = Array.from(e.target.files);
             for (let file of files) {
                 if (file.size > 5 * 1024 * 1024) { 
-                    showToast(`文件 ${file.name} 超过 5MB，请压缩后上传`, 'error');
+                    showToast(`文件 ${file.name} 超过 5MB`, 'error');
                     continue;
                 }
                 const base64 = await toBase64(file);
@@ -279,40 +292,47 @@
         }
 
         /** =========================
-         * ③ 核心 API 调用：增强稳定性
+         * ③ 核心 API 调用：移除强制中断逻辑，确保生成
          * ========================= */
         const wait = ms => new Promise(res => setTimeout(res, ms));
 
-        async function callGeminiWithRetry(prompt, attachments = []) {
-            const maxRetries = 3;
+        async function callGeminiWithRetry(prompt, type, attachments = []) {
+            const maxRetries = 5; // 增加重试次数
             let lastError = null;
 
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     if (i > 0) {
-                        const delay = Math.pow(2, i) * 1000;
-                        updateUIStatus(`正在处理中，请稍候 (${i}/${maxRetries-1})...`);
-                        await wait(delay);
+                        updateUIStatus(`正在持续研判中，请稍候... (第 ${i+1} 次尝试)`);
+                        await wait(2000 * i); // 增加重试延迟
                     }
-                    return await performApiCall(prompt, attachments);
+                    return await performApiCall(prompt, type, attachments);
                 } catch (error) {
                     console.warn(`Attempt ${i+1} failed:`, error.message);
                     lastError = error;
-                    if (error.message.includes("40") && !error.message.includes("429")) throw error;
+                    // 只有在致命错误时才直接抛出，其他错误继续重试
+                    if (error.message.includes("401") || error.message.includes("403") || error.message.includes("400")) throw error;
                 }
             }
-            throw lastError;
+            throw lastError || new Error("模型响应较慢，请稍后再次点击生成按钮");
         }
 
-        async function performApiCall(prompt, attachments) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 60000);
-
+        async function performApiCall(prompt, type, attachments) {
+            // 注意：此处不再设置 AbortController 强制中断，允许长耗时请求
             try {
                 const hasImages = attachments && attachments.length > 0;
-                const systemMsg = hasImages 
-                    ? "你是一个食品安全风控专家。请分析文字描述并仔细识别图片附件中的异物细节、日期等视觉证据。" 
-                    : "你是一个食品安全风控专家。请基于文字描述从法律和风控角度给出研判。";
+                
+                const internalSystem = `你是一个深耕食品安全法与企业合规的资深风控专家。
+你的任务是为内部管理层提供【深度且全面】的研判报告。请按以下结构输出：
+1. 【风险定级】：红/黄/蓝等级，并阐述理由。
+2. 【法律条文对照】：引用《食安法》、《消保法》具体条文分析瑕疵与缺陷。
+3. 【证据链检视】：分析现有证据薄弱点及后续需补强的证据。
+4. 【谈判口径建议】：给出针对性的博弈策略及赔付红线。
+5. 【舆情预警】：针对可能的曝光给出应对方案。`;
+
+                const externalSystem = `你是一个专业的公关与客诉法务专家。请起草一份具备“高度防御性”的正式对外答复函。必须使用专业、严谨、不认责的话术。`;
+
+                const systemMsg = (type === 'PLAN') ? internalSystem : externalSystem;
 
                 let userContent = hasImages 
                     ? [{ type: "text", text: prompt }, ...attachments.map(url => ({ type: "image_url", image_url: { url, detail: "auto" } }))]
@@ -330,23 +350,21 @@
                             { role: "system", content: systemMsg },
                             { role: "user", content: userContent }
                         ],
-                        temperature: 0.3
-                    }),
-                    signal: controller.signal
+                        temperature: 0.3,
+                        max_tokens: 3500 // 增加输出长度
+                    })
                 });
 
                 if (!response.ok) {
-                    const errorBody = await response.json().catch(() => ({}));
-                    throw new Error(`API Error ${response.status}: ${errorBody.error?.message || "Unknown error"}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || `API Error ${response.status}`);
                 }
 
                 const data = await response.json();
-                if (!data.choices?.[0]?.message?.content) throw new Error("API 返回了空数据");
-                
-                const content = data.choices[0].message.content;
-                return typeof content === 'string' ? content : (Array.isArray(content) ? content.filter(i => i.type === 'text').map(i => i.text).join('') : JSON.stringify(content));
-            } finally {
-                clearTimeout(timeoutId);
+                return data.choices[0].message.content;
+            } catch (e) {
+                if (e.name === 'AbortError') throw new Error("连接中断，正在自动恢复...");
+                throw e;
             }
         }
 
@@ -357,10 +375,7 @@
                 return;
             }
 
-            const hasImages = uploadedImages.length > 0;
-            updateUIState(true, hasImages ? 'AI 视觉分析中...' : 'AI 逻辑分析中...');
-            document.getElementById('modeTag').innerText = hasImages ? '多模态模式' : '纯文本模式';
-
+            updateUIState(true, 'AI 深度研判中...');
             const outPlan = document.getElementById('outPlan');
             const outReply = document.getElementById('outReply');
 
@@ -369,12 +384,12 @@
                     const corp = document.getElementById('corpType').value;
                     const user = document.getElementById('complainantType').value;
                     const esc = document.getElementById('escalation').value;
-                    const prompt = `【背景】：${corp}；【投诉人】：${user}；【现状】：${esc}\n【描述】：${facts}\n【任务】：定性事件、列出抗辩点、给赔付建议。`;
+                    const prompt = `【企业背景】：${corp}\n【投诉人】：${user}\n【现状】：${esc}\n【详情】：${facts}\n\n请输出完整的深度研判策略报告。`;
                     
-                    outPlan.textContent = "正在生成策略，请稍候...";
-                    const result = await callGeminiWithRetry(prompt, uploadedImages);
+                    outPlan.textContent = "AI 正在分析证据链并对标法规，请耐心等待...";
+                    const result = await callGeminiWithRetry(prompt, 'PLAN', uploadedImages);
                     outPlan.textContent = result;
-                    showToast('应对思路已生成', 'success');
+                    showToast('研判报告生成成功', 'success');
                 } else {
                     const planText = outPlan.innerText;
                     if (planText.length < 15) {
@@ -382,15 +397,18 @@
                         updateUIState(false);
                         return;
                     }
-                    const prompt = `【客诉】：${facts}\n【内部策略】：${planText}\n【任务】：起草一份正式的对外答复函。`;
-                    outReply.textContent = "正在起草公文...";
-                    const result = await callGeminiWithRetry(prompt, uploadedImages);
+                    const prompt = `【客诉 facts】：${facts}\n【研判策略】：${planText}\n\n请起草正式对外公函。`;
+                    outReply.textContent = "正在生成正式答复函，请稍候...";
+                    const result = await callGeminiWithRetry(prompt, 'REPLY', uploadedImages);
                     outReply.textContent = result;
-                    showToast('答复函已完成', 'success');
+                    showToast('答复函起草完毕', 'success');
                 }
             } catch (err) {
-                showToast(`生成失败: ${err.message}`, 'error');
+                showToast(`生成异常: ${err.message}`, 'error');
                 console.error(err);
+                // 出错后显示详细错误在输出区，方便排查
+                const target = type === 'PLAN' ? outPlan : outReply;
+                target.innerHTML = `<span class="text-red-500">生成中断：${err.message}<br>建议：检查 API 额度或刷新重试。</span>`;
             } finally {
                 updateUIState(false);
             }
@@ -401,9 +419,15 @@
             const statusText = document.getElementById('statusText');
             const statusDot = document.getElementById('statusDot');
             statusText.textContent = text;
-            statusDot.className = isBusy ? 'w-2 h-2 rounded-full bg-blue-500 animate-pulse' : 'w-2 h-2 rounded-full bg-green-500';
-            document.getElementById('btnPlan').disabled = isBusy;
-            document.getElementById('btnReply').disabled = isBusy;
+            if (isBusy) {
+                statusDot.className = 'w-2 h-2 rounded-full bg-blue-500 status-pulse';
+                document.getElementById('btnPlan').disabled = true;
+                document.getElementById('btnReply').disabled = true;
+            } else {
+                statusDot.className = 'w-2 h-2 rounded-full bg-green-500';
+                document.getElementById('btnPlan').disabled = false;
+                document.getElementById('btnReply').disabled = false;
+            }
         }
 
         function updateUIStatus(text) {
@@ -438,7 +462,7 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            showToast('已复制到剪贴板', 'success');
+            showToast('已复制内容', 'success');
         }
 
         function exportToDoc() {
