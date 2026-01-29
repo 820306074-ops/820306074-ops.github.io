@@ -230,8 +230,6 @@
         /** =========================
          * ① 核心配置：已更新为您的豆包接入信息
          * ========================= */
-        const API_KEY = "4bcbe285-c162-4c7d-905c-941a3b030ba5";
-        const VOLC_ENDPOINT = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
         const MODEL_ID = "ep-m-20260129125546-l8qvt"; 
 
         let uploadedImages = []; // 存储 base64 用于多模态调用
@@ -329,11 +327,10 @@
                     messages.push({ role: "user", content: prompt });
                 }
 
-                const response = await fetch(VOLC_ENDPOINT, {
+               const response = await fetch('/api/doubao', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
                     },
                     body: JSON.stringify({
                         model: MODEL_ID,
@@ -471,3 +468,4 @@
 </body>
 
 </html>
+
