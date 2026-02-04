@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
     try {
         // 【关键】如果你没设环境变量，暂时先直接把 Key 填在这里字符串里测试
-        const API_KEY = process.env.VOLC_API_KEY || "这里填入你的真实Key";
+        const API_KEY = process.env.VOLC_API_KEY || "4bcbe285-c162-4c7d-905c-941a3b030ba5";
         const endpoint = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
 
         const response = await fetch(endpoint, {
