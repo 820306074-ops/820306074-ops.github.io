@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI客诉应对助手</title>
+    <title>AI客诉应对助手 - 专业深度稳定版</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js 用于渲染 Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
         :root {
             --primary: #2563eb;
-            --primary-hover: #1d4ed8;
         }
 
         body {
@@ -20,21 +22,15 @@
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
+        /* 滚动条美化 */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
         .input-focus:focus {
             outline: none;
@@ -42,32 +38,23 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        .img-container {
-            position: relative;
-            display: inline-block;
-        }
+        /* Markdown 内容样式优化 */
+        .prose h1, .prose h2, .prose h3 { color: #1e293b; font-weight: 700; margin-top: 1em; margin-bottom: 0.5em; }
+        .prose ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1em; }
+        .prose ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 1em; }
+        .prose p { margin-bottom: 0.8em; line-height: 1.6; }
+        .prose strong { color: #0f172a; font-weight: 700; }
+        .prose blockquote { border-left: 4px solid #e2e8f0; padding-left: 1em; color: #64748b; font-style: italic; background: #f8fafc; padding-top: 0.5em; padding-bottom: 0.5em;}
+
+        .img-container { position: relative; display: inline-block; }
         .img-remove {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #ef4444;
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute; top: -6px; right: -6px;
+            background: #ef4444; color: white; border-radius: 50%;
+            width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* 呼吸灯效果优化 */
-        .status-pulse {
-            animation: pulse-blue 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
+        .status-pulse { animation: pulse-blue 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse-blue {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: .5; transform: scale(1.2); }
@@ -80,13 +67,13 @@
         <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-slate-900 tracking-tight">AI 客诉应对助手 <span class="text-blue-600 text-sm font-normal ml-2">专业深度版</span></h1>
-                <p class="text-slate-500 mt-1 text-sm">已接入豆包 Doubao-1.8 | 增强型风控模型 | 移除响应限时，确保完整生成</p>
-                <p class="text-[10px] text-slate-400 mt-1">安全部：李川；存在疑问通过企业微信联系我</p>
+                <p class="text-slate-500 mt-1 text-sm">已接入豆包AI识别 | 增强型风控模型 | 多模态研判</p>
+                <p class="text-[10px] text-slate-400 mt-1">安全模式：Key 已托管至后端服务器，前端安全无泄露。</p>
             </div>
             <div class="flex items-center gap-3">
                 <div id="statusIndicator" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-xs font-medium text-slate-600 border border-slate-200">
                     <div class="w-2 h-2 rounded-full bg-green-500" id="statusDot"></div>
-                    <span id="statusText">准备就绪</span>
+                    <span id="statusText">后端连接就绪</span>
                 </div>
             </div>
         </header>
@@ -105,8 +92,8 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">企业类型</label>
                                 <select id="corpType" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm input-focus transition-all">
+                                    <option>餐饮团餐</option>
                                     <option>食品生产企业</option>
-                                    <option>餐饮门店</option>
                                     <option>食品贸易/经销</option>
                                     <option>仓储物流/冷链</option>
                                     <option>其他</option>
@@ -144,7 +131,7 @@
                         </div>
 
                         <div class="pt-2">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">附件证据 (若上传则开启多模态研判)</label>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">附件证据 (图片分析)</label>
                             <div class="relative">
                                 <input type="file" id="fileInput" multiple class="hidden" accept="image/*">
                                 <button onclick="document.getElementById('fileInput').click()" class="w-full border-2 border-dashed border-slate-200 rounded-xl py-6 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 transition-colors group">
@@ -168,7 +155,6 @@
                     </div>
                 </section>
 
-                <!-- 合规与风险提示 -->
                 <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl shadow-sm">
                     <div class="flex items-center gap-2 mb-1">
                         <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
@@ -177,7 +163,7 @@
                         <h4 class="text-xs font-bold text-amber-800 uppercase">合规与风险提示</h4>
                     </div>
                     <p class="text-xs text-amber-700 leading-relaxed">
-                        本助手生成内容仅供内部处理投诉提供思路参考，不可直接作为正式结论。如需对外起草正式答复函件或涉及大额赔偿，<strong>请务必联系法务部门进行最终核准</strong>。
+                        本助手生成内容仅供参考。大额赔偿或涉及监管函件，<strong>请务必经过法务部门核准</strong>。
                     </p>
                 </div>
             </div>
@@ -189,12 +175,11 @@
                     <div class="bg-slate-900 px-6 py-3 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <h3 class="font-bold text-white text-sm">深度研判思路 (对内)</h3>
-                            <span id="modeTag" class="px-2 py-0.5 rounded bg-slate-700 text-[10px] font-bold text-slate-300 uppercase">等待指令</span>
                         </div>
-                        <button onclick="copyToClipboard('outPlan')" class="text-xs text-slate-400 hover:text-white font-medium">复制策略</button>
+                        <button onclick="copyToClipboard('outPlan')" class="text-xs text-slate-400 hover:text-white font-medium">复制内容</button>
                     </div>
-                    <div class="p-6 flex-grow flex flex-col">
-                        <div id="outPlan" class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed custom-scrollbar overflow-y-auto max-h-[600px] flex-grow" data-placeholder="点击左侧按钮开始生成深度研判报告..."></div>
+                    <div class="p-6 flex-grow flex flex-col bg-white">
+                        <div id="outPlan" class="prose prose-sm max-w-none text-slate-700 custom-scrollbar overflow-y-auto max-h-[600px] flex-grow" data-placeholder="点击左侧按钮开始生成深度研判报告..."></div>
                     </div>
                 </section>
 
@@ -210,8 +195,8 @@
                             <button id="btnExport" class="text-xs text-blue-100 hover:text-white font-medium">导出 Word</button>
                         </div>
                     </div>
-                    <div class="p-6 flex-grow flex flex-col">
-                        <div id="outReply" class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed custom-scrollbar overflow-y-auto max-h-[400px] flex-grow" data-placeholder="策略生成后，可一键转化起草正式对外函件..."></div>
+                    <div class="p-6 flex-grow flex flex-col bg-white">
+                        <div id="outReply" class="prose prose-sm max-w-none text-slate-700 custom-scrollbar overflow-y-auto max-h-[400px] flex-grow" data-placeholder="策略生成后，可一键转化起草正式对外函件..."></div>
                     </div>
                 </section>
             </div>
@@ -223,12 +208,15 @@
 
     <script>
         /** =========================
-         * ① 核心配置
+         * ① 配置区域
          * ========================= */
-        const API_KEY = "4bcbe285-c162-4c7d-905c-941a3b030ba5";
-        const VOLC_ENDPOINT = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
+        
+        // 【重要】请确认你的后端地址
+        // 1. 如果你发布到了 Vercel，通常是 "/api/chat"
+        // 2. 如果你在本地直接打开 HTML (file://)，这里必须填完整域名，如 "https://你的项目名.vercel.app/api/chat"
+        const BACKEND_URL = "/api/chat"; 
+        
         const MODEL_ID = "ep-m-20260129125546-l8qvt"; 
-
         let uploadedImages = []; 
 
         window.onload = () => {
@@ -292,78 +280,108 @@
         }
 
         /** =========================
-         * ③ 核心 API 调用：移除强制中断逻辑，确保生成
+         * ② 核心 API 调用 (适配 Vercel Backend)
          * ========================= */
         const wait = ms => new Promise(res => setTimeout(res, ms));
 
-        async function callGeminiWithRetry(prompt, type, attachments = []) {
-            const maxRetries = 5; // 增加重试次数
+        async function callBackendWithRetry(prompt, type, attachments = []) {
+            const maxRetries = 3;
             let lastError = null;
 
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     if (i > 0) {
-                        updateUIStatus(`正在持续研判中，请稍候... (第 ${i+1} 次尝试)`);
-                        await wait(2000 * i); // 增加重试延迟
+                        updateUIStatus(`正在请求后端，请稍候... (第 ${i+1} 次尝试)`);
+                        await wait(2000 * i);
                     }
                     return await performApiCall(prompt, type, attachments);
                 } catch (error) {
                     console.warn(`Attempt ${i+1} failed:`, error.message);
                     lastError = error;
-                    // 只有在致命错误时才直接抛出，其他错误继续重试
-                    if (error.message.includes("401") || error.message.includes("403") || error.message.includes("400")) throw error;
+                    // 如果是参数错误(400)或认证错误(401)，不再重试
+                    if (error.message.includes("400") || error.message.includes("401")) throw error;
                 }
             }
-            throw lastError || new Error("模型响应较慢，请稍后再次点击生成按钮");
+            throw lastError || new Error("请求超时，请检查网络或后端配置");
         }
 
         async function performApiCall(prompt, type, attachments) {
-            // 注意：此处不再设置 AbortController 强制中断，允许长耗时请求
+            const hasImages = attachments && attachments.length > 0;
+            
+            // 定义系统提示词
+            const internalSystem = `你是一个深耕食品安全法与企业合规的资深风控专家。
+你的任务是为内部管理层提供【深度且全面】的研判报告。请使用 Markdown 格式输出，重点加粗关键信息。
+结构要求：
+1. **风险定级**：红/黄/蓝等级，并阐述理由。
+2. **法律条文对照**：引用《食安法》、《消保法》具体条文。
+3. **证据链检视**：分析现有证据薄弱点。
+4. **谈判口径建议**：给出针对性的博弈策略。
+5. **舆情预警**：应对方案。`;
+
+            const externalSystem = `你是一个专业的公关与客诉法务专家。请起草一份具备“高度防御性”的正式对外答复函。必须使用专业、严谨、不认责的话术。请使用 Markdown 格式。`;
+
+            const systemMsg = (type === 'PLAN') ? internalSystem : externalSystem;
+
+            // 1. 组装消息列表 (OpenAI / Volcengine 格式)
+            let messages = [
+                { role: "system", content: systemMsg }
+            ];
+
+            if (hasImages) {
+                messages.push({
+                    role: "user",
+                    content: [
+                        { type: "text", text: prompt },
+                        ...attachments.map(url => ({ 
+                            type: "image_url", 
+                            image_url: { url: url } 
+                        }))
+                    ]
+                });
+            } else {
+                messages.push({ role: "user", content: prompt });
+            }
+
+            // 2. 组装完整的 payload 发给后端
+            const payload = {
+                model: MODEL_ID,
+                messages: messages,
+                temperature: 0.3,
+                max_tokens: 4096,
+                stream: false
+            };
+
+            // 3. 发送请求给后端代理
             try {
-                const hasImages = attachments && attachments.length > 0;
-                
-                const internalSystem = `你是一个深耕食品安全法与企业合规的资深风控专家。
-你的任务是为内部管理层提供【深度且全面】的研判报告。请按以下结构输出：
-1. 【风险定级】：红/黄/蓝等级，并阐述理由。
-2. 【法律条文对照】：引用《食安法》、《消保法》具体条文分析瑕疵与缺陷。
-3. 【证据链检视】：分析现有证据薄弱点及后续需补强的证据。
-4. 【谈判口径建议】：给出针对性的博弈策略及赔付红线。
-5. 【舆情预警】：针对可能的曝光给出应对方案。`;
-
-                const externalSystem = `你是一个专业的公关与客诉法务专家。请起草一份具备“高度防御性”的正式对外答复函。必须使用专业、严谨、不认责的话术。`;
-
-                const systemMsg = (type === 'PLAN') ? internalSystem : externalSystem;
-
-                let userContent = hasImages 
-                    ? [{ type: "text", text: prompt }, ...attachments.map(url => ({ type: "image_url", image_url: { url, detail: "auto" } }))]
-                    : prompt;
-
-                const response = await fetch(VOLC_ENDPOINT, {
+                const response = await fetch(BACKEND_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        model: MODEL_ID,
-                        messages: [
-                            { role: "system", content: systemMsg },
-                            { role: "user", content: userContent }
-                        ],
-                        temperature: 0.3,
-                        max_tokens: 3500 // 增加输出长度
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error?.message || `API Error ${response.status}`);
+                    // 尝试解析错误信息
+                    const errorText = await response.text();
+                    let errorMsg = `后端错误 ${response.status}`;
+                    try {
+                        const jsonErr = JSON.parse(errorText);
+                        if (jsonErr.error && jsonErr.error.message) errorMsg = jsonErr.error.message;
+                    } catch (e) {}
+                    throw new Error(errorMsg);
                 }
 
                 const data = await response.json();
-                return data.choices[0].message.content;
+                
+                // 4. 解析返回结果
+                if (data.choices && data.choices.length > 0) {
+                    return data.choices[0].message.content;
+                } else {
+                    throw new Error("模型返回了空内容");
+                }
+
             } catch (e) {
-                if (e.name === 'AbortError') throw new Error("连接中断，正在自动恢复...");
                 throw e;
             }
         }
@@ -378,6 +396,7 @@
             updateUIState(true, 'AI 深度研判中...');
             const outPlan = document.getElementById('outPlan');
             const outReply = document.getElementById('outReply');
+            const rawPlanText = outPlan.innerText; 
 
             try {
                 if (type === 'PLAN') {
@@ -386,29 +405,34 @@
                     const esc = document.getElementById('escalation').value;
                     const prompt = `【企业背景】：${corp}\n【投诉人】：${user}\n【现状】：${esc}\n【详情】：${facts}\n\n请输出完整的深度研判策略报告。`;
                     
-                    outPlan.textContent = "AI 正在分析证据链并对标法规，请耐心等待...";
-                    const result = await callGeminiWithRetry(prompt, 'PLAN', uploadedImages);
-                    outPlan.textContent = result;
+                    outPlan.innerHTML = "<div class='flex items-center gap-2 text-blue-600'><div class='w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin'></div><span>正在连接云端大脑分析中...</span></div>";
+                    
+                    const result = await callBackendWithRetry(prompt, 'PLAN', uploadedImages);
+                    // 使用 marked 渲染 Markdown
+                    outPlan.innerHTML = marked.parse(result);
                     showToast('研判报告生成成功', 'success');
                 } else {
-                    const planText = outPlan.innerText;
-                    if (planText.length < 15) {
+                    if (rawPlanText.length < 15 || rawPlanText.includes("点击左侧")) {
                         showToast('请先生成内部思路', 'warning');
                         updateUIState(false);
                         return;
                     }
-                    const prompt = `【客诉 facts】：${facts}\n【研判策略】：${planText}\n\n请起草正式对外公函。`;
-                    outReply.textContent = "正在生成正式答复函，请稍候...";
-                    const result = await callGeminiWithRetry(prompt, 'REPLY', uploadedImages);
-                    outReply.textContent = result;
+                    const prompt = `【客诉 facts】：${facts}\n【研判策略】：${rawPlanText}\n\n请起草正式对外公函。`;
+                    outReply.innerHTML = "<div class='flex items-center gap-2 text-blue-600'><div class='w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin'></div><span>正在撰写正式公函...</span></div>";
+                    
+                    const result = await callBackendWithRetry(prompt, 'REPLY', uploadedImages);
+                    outReply.innerHTML = marked.parse(result);
                     showToast('答复函起草完毕', 'success');
                 }
             } catch (err) {
-                showToast(`生成异常: ${err.message}`, 'error');
+                showToast(`生成异常`, 'error');
                 console.error(err);
-                // 出错后显示详细错误在输出区，方便排查
                 const target = type === 'PLAN' ? outPlan : outReply;
-                target.innerHTML = `<span class="text-red-500">生成中断：${err.message}<br>建议：检查 API 额度或刷新重试。</span>`;
+                target.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">
+                    <strong class="flex items-center gap-2">⚠️ 生成失败</strong>
+                    <div class="mt-2">${err.message}</div>
+                    <div class="mt-4 text-xs text-red-400">请检查：后端服务是否正常运行、Key 是否配置正确。</div>
+                </div>`;
             } finally {
                 updateUIState(false);
             }
@@ -423,10 +447,12 @@
                 statusDot.className = 'w-2 h-2 rounded-full bg-blue-500 status-pulse';
                 document.getElementById('btnPlan').disabled = true;
                 document.getElementById('btnReply').disabled = true;
+                document.body.style.cursor = 'wait';
             } else {
                 statusDot.className = 'w-2 h-2 rounded-full bg-green-500';
                 document.getElementById('btnPlan').disabled = false;
                 document.getElementById('btnReply').disabled = false;
+                document.body.style.cursor = 'default';
             }
         }
 
@@ -454,25 +480,37 @@
         }
 
         function copyToClipboard(id) {
+            // 获取 innerText 会丢失格式，但如果是 markdown 解析后的 HTML，我们尝试获取纯文本
             const text = document.getElementById(id).innerText;
             if (text.length < 5) return;
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            showToast('已复制内容', 'success');
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('已复制内容', 'success');
+            }).catch(() => {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                showToast('已复制内容', 'success');
+            });
         }
 
         function exportToDoc() {
-            const content = document.getElementById('outReply').innerText;
+            const content = document.getElementById('outReply').innerHTML;
             if (content.length < 20) return;
-            const blob = new Blob(['\ufeff' + content], { type: 'application/msword' });
+            // 包装成完整的 HTML 格式，以便 Word 正确解析
+            const htmlContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset='utf-8'><title>客诉答复函</title></head>
+                <body>${content}</body>
+                </html>`;
+            
+            const blob = new Blob([htmlContent], { type: 'application/msword' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `客诉答复函_${new Date().getTime()}.doc`;
+            a.download = `客诉答复函_${new Date().toISOString().slice(0,10)}.doc`;
             a.click();
             URL.revokeObjectURL(url);
         }
