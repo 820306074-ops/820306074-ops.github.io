@@ -248,8 +248,9 @@
         async function handleFileSelect(e) {
             const files = Array.from(e.target.files);
             for (let file of files) {
-                if (file.size > 5 * 1024 * 1024) { 
-                    showToast(`文件 ${file.name} 超过 5MB`, 'error');
+                // Vercel Serverless 限制 Paylaod 为 4.5MB，图片 Base64 后体积会增加，故限制 3MB
+                if (file.size > 3 * 1024 * 1024) { 
+                    showToast(`文件 ${file.name} 超过 3MB，Vercel 限制无法处理大文件`, 'error');
                     continue;
                 }
                 const base64 = await toBase64(file);
@@ -298,7 +299,8 @@
                 } catch (error) {
                     console.warn(`Attempt ${i+1} failed:`, error.message);
                     lastError = error;
-                    if (error.message.includes("400") || error.message.includes("401")) throw error;
+                    // 如果是严重的 API 错误（如 400/401），则不重试
+                    if (error.message.includes("400") || error.message.includes("401") || error.message.includes("413")) throw error;
                 }
             }
             throw lastError || new Error("请求超时，请检查网络或后端配置");
