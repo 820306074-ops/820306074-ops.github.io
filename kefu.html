@@ -63,10 +63,25 @@
 </head>
 <body class="min-h-screen py-8">
     <div class="max-w-6xl mx-auto px-4">
+        
+        <!-- 新增：网络诊断面板 (V3.0 特性) -->
+        <div class="mb-6 p-4 bg-slate-800 rounded-xl text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="w-2 h-2 rounded-full bg-yellow-400" id="diagDot"></span>
+                    <h3 class="font-bold text-sm">🔧 系统自检面板</h3>
+                </div>
+                <p class="text-xs text-slate-400 font-mono" id="currentUrlDisplay">正在检测配置...</p>
+            </div>
+            <button onclick="testConnection()" id="btnTestConn" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold transition-all border border-slate-600">
+                测试连通性
+            </button>
+        </div>
+
         <!-- 头部导航 -->
         <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">AI 客诉应对助手 <span class="text-blue-600 text-sm font-normal ml-2">专业深度版</span></h1>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">AI 客诉应对助手 <span class="text-blue-600 text-sm font-normal ml-2">专业深度版 V3.0</span></h1>
                 <p class="text-slate-500 mt-1 text-sm">已接入豆包AI识别 | 增强型风控模型 | 多模态研判</p>
                 <p class="text-[10px] text-slate-400 mt-1">安全模式：Key 已托管至后端服务器，前端安全无泄露。</p>
             </div>
@@ -222,7 +237,34 @@
         window.onload = () => {
             initPlaceholder();
             setupEventListeners();
+            // 显示当前配置的 URL 方便调试
+            document.getElementById('currentUrlDisplay').innerText = `API 接入点: ${BACKEND_URL.substring(0, 35)}...`;
         };
+
+        // 🟢 网络连通性测试函数
+        async function testConnection() {
+            const btn = document.getElementById('btnTestConn');
+            const dot = document.getElementById('diagDot');
+            btn.innerText = "测试中...";
+            btn.disabled = true;
+            
+            try {
+                // 发送一个简单的 GET 请求，后端如果活着会返回 405 或 错误信息，但这说明通了
+                // 注意：fetch GET 到后端，如果后端只允许 POST，通常会返回 405 Method Not Allowed，这也算通
+                const res = await fetch(BACKEND_URL, { method: 'GET' }); 
+                // 只要不是网络错误（catch），就算通了。即使是 405 也是通的。
+                
+                showToast("✅ 连接成功！后端服务正常响应。", "success");
+                dot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]";
+            } catch (e) {
+                showToast("❌ 连接失败：" + e.message, "error");
+                dot.className = "w-2 h-2 rounded-full bg-red-500";
+                alert("严重错误：浏览器无法连接到 Vercel。\n请检查：\n1. 你的网络是否能访问 vercel.app\n2. 前端代码 URL 是否有空格\n3. 尝试使用无痕模式");
+            } finally {
+                btn.innerText = "测试连通性";
+                btn.disabled = false;
+            }
+        }
 
         function fillStandardExample() {
             const example = "【时间】：2024年1月15日\n【涉及产品】：批次为231102的‘经典原味饼干’\n【客诉事实】：顾客反馈在产品中发现黑色异物（疑似2cm长硬质塑料片），称其小孩吞食后不适，仅提供一张照片且背景模糊，拒绝退回实物检测。\n【诉求】：要求赔偿1000元并退款，否则投诉到市监局并公开曝光。\n【沟通现状】：客服致电提出补偿50元券，被拒绝。";
@@ -350,35 +392,46 @@
                 model: MODEL_ID,
                 messages: messages,
                 temperature: 0.3,
-                max_tokens: 4096,
+                max_tokens: 2048, // 🔻 降级：防止 Vercel 10秒超时（之前是 4096）
                 stream: false
             };
 
-            const response = await fetch(BACKEND_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                    // 前端不需要 Authorization 头，后端会加
-                },
-                body: JSON.stringify(payload)
-            });
+            // 计时器，用于诊断超时
+            const startTime = Date.now();
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorMsg = `后端错误 ${response.status}`;
-                try {
-                    const jsonErr = JSON.parse(errorText);
-                    if (jsonErr.error && jsonErr.error.message) errorMsg = jsonErr.error.message;
-                } catch (e) {}
-                throw new Error(errorMsg);
-            }
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // 前端不需要 Authorization 头，后端会加
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            const data = await response.json();
-            
-            if (data.choices && data.choices.length > 0) {
-                return data.choices[0].message.content;
-            } else {
-                throw new Error("模型返回了空内容");
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorMsg = `后端错误 ${response.status}`;
+                    try {
+                        const jsonErr = JSON.parse(errorText);
+                        if (jsonErr.error && jsonErr.error.message) errorMsg = jsonErr.error.message;
+                    } catch (e) {}
+                    throw new Error(errorMsg);
+                }
+
+                const data = await response.json();
+                
+                if (data.choices && data.choices.length > 0) {
+                    return data.choices[0].message.content;
+                } else {
+                    throw new Error("模型返回了空内容");
+                }
+            } catch (e) {
+                const duration = (Date.now() - startTime) / 1000;
+                if (e.message.includes("Failed to fetch") && duration > 8) {
+                    throw new Error("请求超时(Vercel限制10秒)。请尝试减少输入字数或不要上传图片。");
+                }
+                throw e;
             }
         }
 
@@ -425,8 +478,13 @@
                 const target = type === 'PLAN' ? outPlan : outReply;
                 target.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">
                     <strong class="flex items-center gap-2">⚠️ 生成失败</strong>
-                    <div class="mt-2">${err.message}</div>
-                    <div class="mt-4 text-xs text-red-400">请检查：后端服务是否正常运行、Key 是否配置正确。</div>
+                    <div class="mt-2 font-bold">${err.message}</div>
+                    <div class="mt-2 text-xs text-red-800 bg-red-100 p-2 rounded">
+                        <strong>排查建议：</strong><br>
+                        1. 如果提示"Failed to fetch"，请先点击页面上方的[测试连通性]按钮。<br>
+                        2. 如果等待超过10秒后报错，说明触发了Vercel免费版超时限制，请减少生成内容。<br>
+                        3. 请务必使用 Chrome 无痕模式 测试以排除缓存干扰。
+                    </div>
                 </div>`;
             } finally {
                 updateUIState(false);
