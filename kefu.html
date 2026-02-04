@@ -248,9 +248,10 @@
         async function handleFileSelect(e) {
             const files = Array.from(e.target.files);
             for (let file of files) {
-                // Vercel Serverless 限制 Paylaod 为 4.5MB，图片 Base64 后体积会增加，故限制 3MB
-                if (file.size > 3 * 1024 * 1024) { 
-                    showToast(`文件 ${file.name} 超过 3MB，Vercel 限制无法处理大文件`, 'error');
+                // Vercel Serverless 限制 Paylaod 为 4.5MB，图片 Base64 后体积会增加
+                // 将限制从 3MB 调整为 1MB，确保绝对安全
+                if (file.size > 1 * 1024 * 1024) { 
+                    showToast(`文件 ${file.name} 超过 1MB，为防止网络超时，请使用更小的图片`, 'error');
                     continue;
                 }
                 const base64 = await toBase64(file);
