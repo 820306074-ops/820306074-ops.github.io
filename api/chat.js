@@ -1,43 +1,38 @@
 // api/chat.js
 export default async function handler(req, res) {
-    // 1. 处理跨域 (CORS)
-    res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
-    );
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    // 2. 处理预检请求 (Options)
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
-    }
+    if (req.method === 'OPTIONS') return res.status(200).end();
 
-    // 3. 限制只允许 POST 请求
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
-    }
-
-    // 4. 调用豆包 AI 接口
     try {
-        // 【注意】：建议将 API_KEY 放在 Vercel 的 Environment Variables 中
-        const API_KEY = "这里填入你的豆包API_KEY"; 
+        // 【关键】如果你没设环境变量，暂时先直接把 Key 填在这里字符串里测试
+        const API_KEY = process.env.VOLC_API_KEY || "这里填入你的真实Key";
         const endpoint = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
 
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
+                'Authorization': `Bearer ${API_KEY.trim()}`
             },
-            body: JSON.stringify(req.body) // 将前端传来的 payload 直接转发
+            body: JSON.stringify(req.body)
         });
 
         const data = await response.json();
-        res.status(200).json(data);
+
+        if (!response.ok) {
+            // 如果豆包 API 返回错误，打印出来，方便我们在日志里看
+            console.error("豆包 API 报错详情:", JSON.stringify(data));
+            return res.status(response.status).json(data);
+        }
+
+        return res.status(200).json(data);
+
     } catch (error) {
-        res.status(500).json({ error: '后端请求失败', details: error.message });
+        // 如果代码本身崩溃，打印崩溃原因
+        console.error("后端代码崩溃原因:", error.message);
+        return res.status(500).json({ error: "Server Error", message: error.message });
     }
 }
