@@ -227,7 +227,7 @@
          * ========================= */
         
         // ✅ 核心修正：使用 Vercel 后端地址（无空格，HTTPS）
-        const BACKEND_URL = "https://820306074-ops-github-io.vercel.app/api/chat";
+        const BACKEND_URL = "https://jolly-hill-f849.820306074.workers.dev";
         
         // 你的推理接入点 ID (EP ID)
         const MODEL_ID = "ep-m-20260129125546-l8qvt"; 
@@ -259,7 +259,7 @@
             } catch (e) {
                 showToast("❌ 连接失败：" + e.message, "error");
                 dot.className = "w-2 h-2 rounded-full bg-red-500";
-                alert("严重错误：浏览器无法连接到 Vercel。\n请检查：\n1. 你的网络是否能访问 vercel.app\n2. 前端代码 URL 是否有空格\n3. 尝试使用无痕模式");
+                alert("严重错误：浏览器无法连接到后端接口。\n请检查：\n1. 网络是否正常\n2. 接口地址是否填写正确\n3. 尝试使用无痕模式");
             } finally {
                 btn.innerText = "测试连通性";
                 btn.disabled = false;
@@ -482,7 +482,7 @@
                     <div class="mt-2 text-xs text-red-800 bg-red-100 p-2 rounded">
                         <strong>排查建议：</strong><br>
                         1. 如果提示"Failed to fetch"，请先点击页面上方的[测试连通性]按钮。<br>
-                        2. 如果等待超过10秒后报错，说明触发了Vercel免费版超时限制，请减少生成内容。<br>
+                        2. 如果等待时间过长后报错，说明请求体过大或网络不稳定，请减少输入内容或稍后再试。<br>
                         3. 请务必使用 Chrome 无痕模式 测试以排除缓存干扰。
                     </div>
                 </div>`;
@@ -568,3 +568,4 @@
     </script>
 </body>
 </html>
+
