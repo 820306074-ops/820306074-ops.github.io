@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI 客诉应对助手 - 专业风控版</title>
+    <title>AI 客诉应对助手 - 豆包专业版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -144,12 +144,13 @@
                     <p class="text-[#A3AED0] text-xs md:text-sm mt-1 font-medium flex flex-wrap gap-x-2">
                         <span>作者：李川</span>
                         <span class="hidden md:inline">|</span>
-                        <span>如有疑问可企业微信联系我</span>
+                        <span>模型：Doubao-Seed-1.8 (火山引擎)</span>
                     </p>
                 </div>
             </div>
             <!-- 桌面端操作区 -->
             <div class="hidden md:flex items-center gap-4 bg-white p-2 pr-4 rounded-[20px] shadow-sm">
+                <!-- 移除了输入框，因为已内置 Key -->
                 <div class="flex items-center gap-2 px-3 py-1.5">
                     <div class="relative flex h-3 w-3">
                       <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 hidden"></span>
@@ -201,17 +202,12 @@
 
                         <div>
                             <div class="flex justify-between items-center mb-2">
-                                <label class="block text-xs font-bold text-[#A3AED0] uppercase tracking-wide">客诉事实描述 <span class="text-[#E02020]">*</span></label>
+                                <label class="block text-xs font-bold text-[#A3AED0] uppercase tracking-wide">客诉事实描述 (含诉求) <span class="text-[#E02020]">*</span></label>
                                 <button onclick="fillStandardExample()" class="text-xs font-bold text-[#4318FF] active:opacity-70 flex items-center gap-1 px-2 py-1 -mr-2">
                                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> 填入示例
                                 </button>
                             </div>
-                            <textarea id="facts" class="modern-input w-full px-5 py-4 min-h-[140px] leading-relaxed resize-none" placeholder="请描述事实，例如：发生时间、批次、异物描述..."></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">客户诉求</label>
-                            <input id="demand" type="text" class="modern-input w-full px-4 py-3.5" placeholder="例如：赔偿1000元、退一赔十、公开道歉等">
+                            <textarea id="facts" class="modern-input w-full px-5 py-4 min-h-[140px] leading-relaxed resize-none" placeholder="请描述事实及客户诉求，例如：发生时间、批次、异物描述、客户要求赔偿金额..."></textarea>
                         </div>
 
                         <div>
@@ -239,7 +235,7 @@
                         </div>
 
                         <button id="generateBtn" onclick="analyzeComplaint()" class="btn-primary w-full py-4 text-lg flex items-center justify-center gap-3">
-                            <span id="btnText">开始专家研判</span>
+                            <span id="btnText">开始专家研判 (Doubao)</span>
                             <div id="btnLoader" class="hidden">
                                 <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -293,15 +289,20 @@
 
     <!-- 移动端浮动操作栏 -->
     <div class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-[#E0E5F2] flex items-center justify-between z-50">
-         <button onclick="resetAll()" class="text-sm font-bold text-[#E02020] px-4">重置</button>
-         <div class="flex items-center gap-2">
-             <div class="h-2 w-2 rounded-full bg-[#05CD99]"></div>
-             <span class="text-[10px] font-bold text-[#A3AED0]">READY</span>
+         <div class="flex justify-between items-center w-full">
+             <button onclick="resetAll()" class="text-sm font-bold text-[#E02020] px-4">重置</button>
+             <div class="flex items-center gap-2">
+                 <div class="h-2 w-2 rounded-full bg-[#05CD99]"></div>
+                 <span class="text-[10px] font-bold text-[#A3AED0]">READY</span>
+             </div>
          </div>
     </div>
 
     <script>
-        const apiKey = "";
+        // 配置：豆包 (Doubao) API 信息
+        const apiKey = "d393f3f3-68f6-47b7-894a-fa514c3121d8"; // 您的 API Key
+        const modelEndpoint = "ep-m-20260205224804-pmwxk";     // 您的 Endpoint ID
+
         let uploadedImages = [];
 
         // 初始化
@@ -341,14 +342,12 @@
         }
 
         function fillStandardExample() {
-            document.getElementById('facts').value = "客户于 2023-10-24 在我司天猫旗舰店购买了 20231024 批次的坚果，拆包后自述发现一小段类似金属丝的异物（约 1.5cm）。客户称食用时划伤了口腔，但目前未提供就医证明。";
-            document.getElementById('demand').value = "赔偿 1000 元";
+            document.getElementById('facts').value = "客户于 2023-10-24 在我司天猫旗舰店购买了 20231024 批次的坚果，拆包后自述发现一小段类似金属丝的异物（约 1.5cm）。客户称食用时划伤了口腔，但目前未提供就医证明。客户诉求：要求赔偿 1000 元，否则将向市监局投诉。";
             document.getElementById('complainantType').value = "疑似职业打假/恶意高赔";
         }
 
         function resetAll() {
             document.getElementById('facts').value = '';
-            document.getElementById('demand').value = '';
             document.getElementById('imagePreview').innerHTML = '';
             document.getElementById('outPlan').innerHTML = '<div class="text-[#A3AED0] italic flex flex-col items-center justify-center py-20 opacity-50"><svg class="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><p>已重置，等待输入...</p></div>';
             document.getElementById('outReply').innerHTML = '<p class="text-[#A3AED0] text-center py-10">等待分析完成...</p>';
@@ -377,23 +376,23 @@
 
             const corpType = document.getElementById('corpType').value;
             const compType = document.getElementById('complainantType').value;
-            const demand = document.getElementById('demand').value;
             const escalation = document.getElementById('escalation').value;
 
-            // 准备共用内容（带附件）
+            // 准备共用内容（构造 OpenAI 兼容的消息格式）
             const parts = [];
+            
             uploadedImages.forEach(img => {
                 parts.push({
-                    inlineData: {
-                        mimeType: img.mimeType,
-                        data: img.data
+                    type: "image_url",
+                    image_url: {
+                        url: `data:${img.mimeType};base64,${img.data}`
                     }
                 });
             });
 
             try {
                 // 第一步：生成内部应对策略
-                btnText.innerText = "法务风控正在研判...";
+                btnText.innerText = "法务风控正在研判 (Doubao)...";
                 statusText.innerText = "法务风控正在研判...";
                 outPlan.innerHTML = '<div class="animate-pulse flex flex-col gap-4 py-10"><div class="h-4 bg-gray-100 rounded w-3/4"></div><div class="h-4 bg-gray-100 rounded"></div><div class="h-4 bg-gray-100 rounded w-5/6"></div></div>';
                 outReply.innerHTML = '<p class="text-[#A3AED0] text-center py-10 italic">等待内部思路生成中...</p>';
@@ -404,7 +403,6 @@
 - 企业类型：${corpType}  
 - 投诉人疑似：${compType}  
 - 事实描述：${f}  
-- 诉求：${demand}  
 - 升级状态：${escalation}
 
 请输出 Markdown 格式，包含：  
@@ -423,8 +421,7 @@
 ## 五、所需证据清单  
 (我们需要去查什么？)  `;
 
-                const strategyParts = [...parts, { text: strategyPrompt }];
-                const strategyResult = await callGemini(strategyResultPrompt => strategyResultPrompt, strategyParts, strategyPrompt);
+                const strategyResult = await callDoubao(strategyPrompt, parts);
                 outPlan.innerHTML = marked.parse(strategyResult);
 
                 // 第二步：生成对外答复函
@@ -443,39 +440,61 @@
 ## 关于用户反馈[产品名]问题的处理说明  
 (正文内容...)  `;
 
-                const replyResult = await callGemini(null, [{ text: replyPrompt }], replyPrompt);
+                const replyResult = await callDoubao(replyPrompt, []); // 第二步通常不需要图片
                 outReply.innerHTML = marked.parse(replyResult);
 
             } catch (error) {
                 console.error(error);
-                outPlan.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-xl">调用失败: ${error.message}</div>`;
+                outPlan.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-xl">调用失败: ${error.message}<br><span class="text-xs text-gray-500">提示：如果您直接在浏览器打开本地 HTML 文件，可能会遇到跨域(CORS)限制。</span></div>`;
             } finally {
                 btn.disabled = false;
-                btnText.innerText = "重新开始专家研判";
+                btnText.innerText = "重新开始专家研判 (Doubao)";
                 btnLoader.classList.add('hidden');
                 statusPing.classList.add('hidden');
                 statusText.innerText = "系统就绪";
             }
         }
 
-        async function callGemini(dummy, parts, systemPrompt, retries = 5) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        async function callDoubao(systemPrompt, imageParts, retries = 3) {
+            // 火山引擎 (Volcengine) OpenAI 兼容接口
+            const url = `https://ark.cn-beijing.volces.com/api/v3/chat/completions`;
             
+            // 构造消息体
+            const content = [{ type: "text", text: systemPrompt }];
+            if (imageParts && imageParts.length > 0) {
+                // 如果是支持视觉的模型，这里会生效；如果是纯文本模型，可能忽略或报错
+                imageParts.forEach(img => content.push(img));
+            }
+
+            const messages = [
+                {
+                    role: "user",
+                    content: content
+                }
+            ];
+
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
                         body: JSON.stringify({
-                            contents: [{ parts: parts.map(p => p.inlineData ? p : { text: p.text }) }],
-                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                            model: modelEndpoint,
+                            messages: messages,
+                            stream: false
                         })
                     });
                     
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    if (!response.ok) {
+                        const errData = await response.text();
+                        throw new Error(`HTTP error! status: ${response.status}, detail: ${errData}`);
+                    }
                     
                     const data = await response.json();
-                    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    const content = data.choices?.[0]?.message?.content;
                     if (!content) throw new Error("API 返回结果为空");
                     return content;
                 } catch (err) {
