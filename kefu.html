@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI 客诉应对助手 - 专业风控版</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Marked.js 用于 Markdown 渲染 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- 引入 Plus Jakarta Sans 字体以获得更现代的外观 -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
@@ -23,14 +21,13 @@
             font-family: 'Plus Jakarta Sans', "PingFang SC", "Microsoft YaHei", sans-serif;
             background-color: var(--bg-color);
             color: #2B3674;
-            /* 移动端滚动流畅性 */
             -webkit-overflow-scrolling: touch;
         }
 
-        /* 现代卡片风格 - 大圆角，柔和阴影 */
+        /* 现代卡片风格 */
         .modern-card {
             background: #ffffff;
-            border-radius: 24px; /* 移动端稍微减小圆角 */
+            border-radius: 24px;
             box-shadow: 0px 10px 30px rgba(112, 144, 176, 0.08);
             border: none;
             transition: all 0.3s ease;
@@ -39,7 +36,7 @@
             .modern-card { border-radius: 30px; box-shadow: 0px 20px 40px rgba(112, 144, 176, 0.08); }
         }
 
-        /* 输入框风格 - 极简，无边框，浅背景 */
+        /* 输入框风格 */
         .modern-input {
             background-color: #F8F9FC;
             border: 1px solid transparent;
@@ -47,12 +44,9 @@
             color: #2B3674;
             font-weight: 500;
             transition: all 0.2s ease;
-            /* 移动端防缩放关键：字体不能小于16px */
             font-size: 16px; 
         }
-        @media (min-width: 768px) {
-            .modern-input { font-size: 14px; }
-        }
+        @media (min-width: 768px) { .modern-input { font-size: 14px; } }
         
         .modern-input:focus {
             background-color: #ffffff;
@@ -60,9 +54,7 @@
             outline: none;
             box-shadow: 0 0 0 4px rgba(67, 24, 255, 0.1);
         }
-        .modern-input::placeholder {
-            color: #A3AED0;
-        }
+        .modern-input::placeholder { color: #A3AED0; }
 
         /* 按钮风格 */
         .btn-primary {
@@ -71,7 +63,7 @@
             color: white;
             font-weight: 700;
             box-shadow: 0 10px 20px rgba(67, 24, 255, 0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
         }
         .btn-primary:active:not(:disabled) { transform: scale(0.98); }
 
@@ -81,6 +73,7 @@
             border: 2px solid #F4F7FE;
             border-radius: 16px;
             font-weight: 700;
+            transition: transform 0.2s, background-color 0.2s, opacity 0.2s;
         }
         .btn-secondary:active:not(:disabled) { background: #F4F7FE; }
 
@@ -114,85 +107,38 @@
         }
 
         /* 标签风格 */
-        .badge {
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        @media (min-width: 768px) {
-            .badge { padding: 6px 14px; font-size: 12px; border-radius: 10px; }
-        }
+        .badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+        @media (min-width: 768px) { .badge { padding: 6px 14px; font-size: 12px; border-radius: 10px; } }
         .badge-purple { background: #F4F0FF; color: #4318FF; }
         .badge-green { background: #E6FFFA; color: #05CD99; }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin 2s linear infinite; }
 
-        /* =========================================
-           Markdown 内容美化样式 (Prose Styling) 
-           ========================================= */
-        .prose {
-            font-size: 14px;
-            color: #2B3674;
-            line-height: 1.75;
-        }
-        
-        .prose h1, .prose h2, .prose h3, .prose h4 {
-            color: #1B2559;
-            font-weight: 700;
-            margin-top: 1.2em;
-            margin-bottom: 0.5em;
-        }
+        /* Markdown 样式 */
+        .prose { font-size: 14px; color: #2B3674; line-height: 1.75; }
+        .prose h1, .prose h2, .prose h3, .prose h4 { color: #1B2559; font-weight: 700; margin-top: 1.2em; margin-bottom: 0.5em; }
         .prose ul, .prose ol { margin-bottom: 1em; padding-left: 1.25em; }
         .prose ul { list-style-type: disc; }
         .prose ol { list-style-type: decimal; }
         .prose li { margin-bottom: 0.4em; }
-
-        /* --- 内部思路专用高亮样式 --- */
-        #outPlan.prose strong {
-            color: #4318FF;
-            font-weight: 700;
-            background-color: #F4F0FF; 
-            padding: 1px 4px;
-            border-radius: 4px;
-            box-decoration-break: clone;
-            -webkit-box-decoration-break: clone;
-        }
-
-        /* --- 对外答复函专用样式 --- */
-        #outReply.prose {
-            font-family: "Songti SC", "SimSun", serif; 
-            font-size: 15px;
-            line-height: 1.8;
-            color: #1a202c;
-        }
-        #outReply.prose strong {
-            font-weight: 600;
-            color: #000;
-            text-decoration: underline;
-            text-decoration-color: #cbd5e0;
-            text-underline-offset: 4px;
-        }
+        .prose blockquote { border-left: 4px solid #E0E5F2; padding-left: 1em; color: #64748B; font-style: italic; background: #F8FAFC; padding: 8px; border-radius: 4px; margin-bottom: 16px; font-size: 13px; }
+        #outPlan.prose strong { color: #4318FF; font-weight: 700; background-color: #F4F0FF; padding: 1px 4px; border-radius: 4px; }
+        #outReply.prose { font-family: "Songti SC", "SimSun", serif; font-size: 15px; line-height: 1.8; color: #1a202c; }
+        #outReply.prose strong { font-weight: 600; color: #000; text-decoration: underline; text-decoration-color: #cbd5e0; text-underline-offset: 4px; }
     </style>
 </head>
 <body class="min-h-screen py-4 px-3 md:py-6 md:px-8 pb-20 md:pb-6">
     
     <div class="max-w-[1400px] mx-auto">
-        <!-- 头部导航：手机端优化布局 -->
+        <!-- 头部 -->
         <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
             <div class="flex items-start gap-3">
-                <!-- 图标 -->
                 <div class="bg-gradient-to-br from-[#05CD99] to-[#02A676] text-white p-3 rounded-2xl shadow-lg shadow-emerald-100 flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                     </svg>
                 </div>
-                <!-- 标题与作者 -->
                 <div class="flex-1">
                     <h1 class="text-2xl md:text-3xl font-extrabold text-[#1B2559] tracking-tight leading-tight">AI 客诉应对助手</h1>
                     <p class="text-[#A3AED0] text-xs md:text-sm mt-1 font-medium flex flex-wrap gap-x-2">
@@ -201,16 +147,8 @@
                         <span>如有疑问可企业微信联系我</span>
                     </p>
                 </div>
-                
-                <!-- 手机端右上角状态栏 -->
-                <div class="md:hidden flex items-center bg-white p-1.5 rounded-xl shadow-sm border border-slate-100">
-                    <div class="relative flex h-2.5 w-2.5 mx-1">
-                        <span id="statusDotMobile" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#05CD99]"></span>
-                    </div>
-                </div>
             </div>
-            
-            <!-- 桌面端状态栏 -->
+            <!-- 桌面端操作区 -->
             <div class="hidden md:flex items-center gap-4 bg-white p-2 pr-4 rounded-[20px] shadow-sm">
                 <div class="flex items-center gap-2 px-3 py-1.5">
                     <div class="relative flex h-3 w-3">
@@ -224,14 +162,11 @@
                     重置
                 </button>
             </div>
-            
-            <!-- 手机端重置按钮 (放到底部或此处) -->
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-            <!-- 左侧：输入区域 -->
+            <!-- 左侧输入 -->
             <div class="lg:col-span-5 space-y-4 md:space-y-6">
-                <!-- 详情录入卡片 -->
                 <section class="modern-card p-5 md:p-8">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-lg md:text-xl font-bold text-[#1B2559]">投诉详情录入</h2>
@@ -245,15 +180,15 @@
                             <div>
                                 <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">企业类型</label>
                                 <select id="corpType" class="modern-input w-full px-4 py-3.5 cursor-pointer appearance-none">
-                                    <option>团餐门店</option>
                                     <option>食品生产企业</option>
+                                    <option>餐饮门店</option>
                                     <option>食品贸易/经销</option>
                                     <option>仓储物流/冷链</option>
                                     <option>其他</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">投诉人类型</label>
+                                <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">投诉人疑似</label>
                                 <select id="complainantType" class="modern-input w-full px-4 py-3.5 cursor-pointer appearance-none">
                                     <option>普通消费者</option>
                                     <option>疑似职业打假/恶意高赔</option>
@@ -266,19 +201,21 @@
 
                         <div>
                             <div class="flex justify-between items-center mb-2">
-                                <label class="block text-xs font-bold text-[#A3AED0] uppercase tracking-wide">
-                                    客诉描述 <span class="text-[#E02020]">*</span>
-                                </label>
+                                <label class="block text-xs font-bold text-[#A3AED0] uppercase tracking-wide">客诉事实描述 <span class="text-[#E02020]">*</span></label>
                                 <button onclick="fillStandardExample()" class="text-xs font-bold text-[#4318FF] active:opacity-70 flex items-center gap-1 px-2 py-1 -mr-2">
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                    填入示例
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> 填入示例
                                 </button>
                             </div>
                             <textarea id="facts" class="modern-input w-full px-5 py-4 min-h-[140px] leading-relaxed resize-none" placeholder="请描述事实，例如：发生时间、批次、异物描述..."></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">事件等级</label>
+                            <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">客户诉求</label>
+                            <input id="demand" type="text" class="modern-input w-full px-4 py-3.5" placeholder="例如：赔偿1000元、退一赔十、公开道歉等">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">升级状态</label>
                             <select id="escalation" class="modern-input w-full px-4 py-3.5 cursor-pointer appearance-none">
                                 <option value="未升级">未升级（内部处理中）</option>
                                 <option value="平台介入">已升级至电商平台/三方平台</option>
@@ -290,465 +227,284 @@
                         <div>
                             <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">附件证据</label>
                             <div class="relative group">
-                                <input type="file" id="fileInput" multiple class="hidden" accept="image/*,application/pdf">
+                                <input type="file" id="fileInput" multiple class="hidden" accept="image/*">
                                 <div onclick="document.getElementById('fileInput').click()" class="w-full border-2 border-dashed border-[#E0E5F2] rounded-2xl py-6 flex flex-col items-center justify-center gap-3 active:bg-[#F4F7FE] transition-all cursor-pointer">
                                     <div class="w-10 h-10 bg-[#F4F7FE] rounded-full flex items-center justify-center text-[#4318FF]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                        </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                                     </div>
-                                    <div class="text-center">
-                                        <span class="text-xs font-bold text-[#2B3674] block">点击上传图片/PDF</span>
-                                        <span class="text-[10px] text-[#A3AED0] mt-1">支持 JPG, PNG, PDF (Max 10MB)</span>
-                                    </div>
+                                    <span class="text-xs font-bold text-[#A3AED0]">点击上传图片证据（可选）</span>
                                 </div>
                             </div>
-                            <!-- 预览区域 -->
-                            <div id="filePreview" class="mt-4 flex flex-wrap gap-3"></div>
-                            <div id="fileCountText" class="text-[10px] text-[#A3AED0] mt-2 font-medium pl-1">暂无文件</div>
+                            <div id="imagePreview" class="grid grid-cols-4 gap-2 mt-3"></div>
                         </div>
-                    </div>
 
-                    <!-- 按钮区域 -->
-                    <div class="mt-8 flex flex-col gap-3">
-                        <button id="btnPlan" class="btn-primary w-full py-3.5 md:py-4 text-sm flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed shadow-blue-500/30">
-                            <span class="btn-text">生成内部应对思路</span>
-                            <div class="loading-icon hidden"><svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
+                        <button id="generateBtn" onclick="analyzeComplaint()" class="btn-primary w-full py-4 text-lg flex items-center justify-center gap-3">
+                            <span id="btnText">开始专家研判</span>
+                            <div id="btnLoader" class="hidden">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
                         </button>
-                        <button id="btnReply" class="btn-secondary w-full py-3.5 md:py-4 text-sm flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed">
-                            <span class="btn-text">生成对外答复</span>
-                            <div class="loading-icon hidden"><svg class="animate-spin h-5 w-5 text-[#4318FF]" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
-                        </button>
-                    </div>
-                    
-                    <div class="mt-4 md:hidden text-center">
-                         <button onclick="resetAll()" class="text-xs font-bold text-[#E02020] hover:text-red-600 transition-colors inline-flex items-center gap-1 p-2">
-                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                             清空所有重置
-                         </button>
                     </div>
                 </section>
-
-                <!-- 法律声明小卡片 -->
-                <div class="p-4 rounded-[20px] bg-gradient-to-r from-[#FFF5F5] to-[#FFFBFB] border border-[#FFEAEA] flex gap-3 shadow-sm">
-                    <div class="text-[#E02020] bg-[#FFEAEA] p-1.5 rounded-lg h-fit">
-                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-[#E02020] mb-0.5">合规免责声明</h4>
-                        <p class="text-xs text-[#E02020] opacity-80 leading-relaxed text-justify">
-                            本内容仅供内部风控参考。正式对外函件务必经法务审核。
-                        </p>
-                    </div>
-                </div>
             </div>
 
-            <!-- 右侧：输出区域 -->
-            <div class="lg:col-span-7 space-y-4 md:space-y-6">
-                <!-- 内部思路板块 -->
-                <section class="modern-card overflow-hidden flex flex-col h-[450px] md:h-[500px] border border-transparent hover:border-[#F4F7FE]">
-                    <div class="p-5 md:p-6 pb-2 flex items-center justify-between border-b border-[#F4F7FE]">
+            <!-- 右侧输出 -->
+            <div class="lg:col-span-7 space-y-6">
+                <!-- 内部应对策略 -->
+                <section class="modern-card p-5 md:p-8 flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-3">
-                            <div class="bg-[#F4F0FF] p-2 rounded-xl text-[#4318FF]">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-[#1B2559] text-base md:text-lg">内部研判 & 策略</h3>
-                                <p class="text-[10px] text-[#A3AED0] font-bold uppercase tracking-wider">Internal Strategy</p>
-                            </div>
+                            <span class="badge badge-purple">内部应对策略</span>
+                            <h2 class="text-lg md:text-xl font-bold text-[#1B2559]">法务风控深度研判</h2>
                         </div>
-                        <div class="badge badge-purple whitespace-nowrap">仅供内部传阅</div>
+                        <button id="copyBtnPlan" onclick="copyResult('outPlan')" class="text-[#4318FF] hover:bg-[#F4F0FF] p-2 rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                        </button>
                     </div>
-                    
-                    <div class="p-5 md:p-6 bg-white flex-grow flex flex-col relative overflow-hidden">
-                        <div id="outPlan" class="prose custom-scrollbar overflow-y-auto h-full pr-2 relative z-10" data-placeholder="等待生成内部策略...">
-                            <!-- Placeholder content handled by JS -->
-                        </div>
-                        
-                        <!-- 底部工具栏 -->
-                        <div class="absolute bottom-4 right-6 z-20">
-                             <button onclick="copyToClipboard('outPlan')" class="bg-white border border-[#E0E5F2] active:bg-[#F4F7FE] text-[#2B3674] text-xs font-bold py-2 px-3 rounded-xl shadow-sm transition-colors flex items-center gap-2">
-                                <svg class="w-3.5 h-3.5 text-[#4318FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                                复制全文
-                            </button>
+                    <div id="outPlan" class="prose max-w-none flex-1 custom-scrollbar overflow-y-auto pr-2" style="max-height: 400px;">
+                        <div class="text-[#A3AED0] italic flex flex-col items-center justify-center py-20 opacity-50">
+                            <svg class="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <p>输入投诉信息后，在此查看内部策略...</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- 对外回复板块 -->
-                <section class="modern-card overflow-hidden flex flex-col h-[400px]">
-                    <div class="p-5 md:p-6 pb-2 flex items-center justify-between border-b border-[#F4F7FE]">
+                <!-- 对外正式回复函 -->
+                <section class="modern-card p-5 md:p-8">
+                    <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-3">
-                            <div class="bg-[#E6FFFA] p-2 rounded-xl text-[#05CD99]">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-[#1B2559] text-base md:text-lg">对外答复函</h3>
-                                <p class="text-[10px] text-[#A3AED0] font-bold uppercase tracking-wider">Formal Reply</p>
-                            </div>
+                            <span class="badge badge-green">对外正式回复函</span>
+                            <h2 class="text-lg md:text-xl font-bold text-[#1B2559]">公关专家撰写</h2>
                         </div>
-                        <div class="badge badge-green whitespace-nowrap">可对外发送</div>
+                        <button id="copyBtnReply" onclick="copyResult('outReply')" class="text-[#05CD99] hover:bg-[#E6FFFA] p-2 rounded-lg transition-colors">
+                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                        </button>
                     </div>
-                    <div class="p-5 md:p-6 bg-[#FAFCFE] flex-grow flex flex-col relative">
-                        <!-- 改用 prose 类进行 Markdown 渲染 -->
-                        <div id="outReply" class="prose custom-scrollbar overflow-y-auto h-full pr-2" data-placeholder="等待生成正式公文..."></div>
-                        
-                        <div class="absolute bottom-4 right-6 flex gap-3 z-20">
-                            <button onclick="copyToClipboard('outReply')" class="bg-white border border-[#E0E5F2] active:bg-[#F4F7FE] text-[#2B3674] text-xs font-bold py-2 px-3 rounded-xl shadow-sm transition-colors">
-                                复制
-                            </button>
-                            <button id="btnExport" class="bg-[#2B3674] active:bg-[#1B2559] text-white text-xs font-bold py-2 px-3 rounded-xl shadow-lg shadow-blue-900/20 transition-all flex items-center gap-2">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                导出
-                            </button>
-                        </div>
+                    <div id="outReply" class="prose max-w-none bg-[#F8F9FC] p-6 rounded-2xl border border-[#E0E5F2] min-h-[150px]">
+                        <p class="text-[#A3AED0] text-center py-10">等待内部策略生成后自动拟定...</p>
                     </div>
                 </section>
             </div>
         </div>
     </div>
 
-    <!-- 弹窗通知 -->
-    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[99] w-[90%] md:w-auto px-6 py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.2)] bg-[#1B2559] text-white text-sm font-bold transform -translate-y-40 opacity-0 transition-all duration-500 flex items-center gap-3 justify-center">
-        <!-- Icon dynamically added via JS -->
+    <!-- 移动端浮动操作栏 -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-[#E0E5F2] flex items-center justify-between z-50">
+         <button onclick="resetAll()" class="text-sm font-bold text-[#E02020] px-4">重置</button>
+         <div class="flex items-center gap-2">
+             <div class="h-2 w-2 rounded-full bg-[#05CD99]"></div>
+             <span class="text-[10px] font-bold text-[#A3AED0]">READY</span>
+         </div>
     </div>
 
     <script>
-        /**
-         * 保持核心逻辑代码 100% 不变
-         */
-        const CONFIG = {
-            API_KEY: "4bcbe285-c162-4c7d-905c-941a3b030ba5",
-            ENDPOINT: "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
-            MODEL_ID: "ep-m-20260129125546-l8qvt",
-            MAX_RETRY: 2
-        };
+        const apiKey = "";
+        let uploadedImages = [];
 
-        let uploadedFiles = [];
-        let progressInterval; 
+        // 初始化
+        document.getElementById('fileInput').addEventListener('change', handleFiles);
 
-        window.onload = () => {
-            renderPlaceholders();
-            initListeners();
-        };
+        function handleFiles(e) {
+            const files = Array.from(e.target.files);
+            const preview = document.getElementById('imagePreview');
+            
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const base64Data = event.target.result.split(',')[1];
+                    const id = Math.random().toString(36).substr(2, 9);
+                    
+                    uploadedImages.push({ id, data: base64Data, mimeType: file.type });
+                    
+                    const div = document.createElement('div');
+                    div.className = 'img-container relative aspect-square';
+                    div.id = `img-${id}`;
+                    div.innerHTML = `
+                        <img src="${event.target.result}" class="w-full h-full object-cover">
+                        <div class="img-remove" onclick="removeImage('${id}')">×</div>
+                    `;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
 
-        function initListeners() {
-            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-            document.getElementById('btnPlan').addEventListener('click', () => runTask('PLAN'));
-            document.getElementById('btnReply').addEventListener('click', () => runTask('REPLY'));
-            document.getElementById('btnExport').addEventListener('click', exportToDoc);
+        function removeImage(id) {
+            uploadedImages = uploadedImages.filter(img => img.id !== id);
+            const el = document.getElementById(`img-${id}`);
+            if (el) el.remove();
         }
 
         function fillStandardExample() {
-            const example = `【发生时间】：2024年1月20日\n【涉及产品】：批次号 240105-A 的“坚果果干混合包”\n【核心事实】：袋内发现一枚直径约1cm的金属垫圈，声称导致其牙齿隐裂。目前仅提供模糊照片。\n【对方诉求】：赔偿医疗费及惩罚性赔偿共计5000元。`;
-            document.getElementById('facts').value = example;
-            showToast("已填充标准案例数据", "success");
-        }
-
-        async function handleFileSelect(e) {
-            const files = Array.from(e.target.files);
-            for (let file of files) {
-                if (file.size > 10 * 1024 * 1024) {
-                    showToast(`文件 ${file.name} 超过 10MB`, 'error');
-                    continue;
-                }
-                try {
-                    const base64 = await toBase64(file);
-                    uploadedFiles.push({ name: file.name, data: base64, type: file.type });
-                } catch (err) {
-                    showToast("文件读取失败", "error");
-                }
-            }
-            renderPreviews();
-        }
-
-        function renderPreviews() {
-            const container = document.getElementById('filePreview');
-            const countText = document.getElementById('fileCountText');
-            container.innerHTML = '';
-            
-            uploadedFiles.forEach((file, index) => {
-                const div = document.createElement('div');
-                div.className = 'img-container w-16 h-16 rounded-xl border border-[#E0E5F2] bg-cover bg-center shadow-sm relative flex-shrink-0';
-                if (file.type === 'application/pdf') {
-                    div.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center bg-[#F4F7FE] text-[#E02020]"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg><span class="text-[8px] font-bold mt-1">PDF</span></div>`;
-                } else {
-                    div.style.backgroundImage = `url(${file.data})`;
-                }
-                const remove = document.createElement('div');
-                remove.className = 'img-remove';
-                remove.innerHTML = '×';
-                remove.onclick = (e) => {
-                    e.stopPropagation();
-                    uploadedFiles.splice(index, 1);
-                    renderPreviews();
-                };
-                div.appendChild(remove);
-                container.appendChild(div);
-            });
-
-            if (uploadedFiles.length > 0) {
-                countText.innerText = `已加载 ${uploadedFiles.length} 个附件`;
-                countText.className = "text-[10px] text-[#05CD99] mt-2 font-bold pl-1";
-            } else {
-                countText.innerText = "暂无文件";
-                countText.className = "text-[10px] text-[#A3AED0] mt-2 font-medium pl-1";
-            }
-        }
-
-        async function callDoubao(prompt, attachments = [], retryCount = 0) {
-            const controller = new AbortController();
-            const timeoutDuration = 120000;
-            const timeout = setTimeout(() => controller.abort(), timeoutDuration);
-
-            try {
-                const messages = [
-                    { role: "system", content: "你是一个深耕食品安全法律与企业风控的专家。请分析证据并给出合规建议。" }
-                ];
-
-                const content = [{ type: "text", text: prompt }];
-                attachments.forEach(item => {
-                    if (item.type.startsWith('image/')) {
-                        content.push({ type: "image_url", image_url: { url: item.data } });
-                    }
-                });
-
-                messages.push({ role: "user", content: content });
-
-                const response = await fetch(CONFIG.ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${CONFIG.API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: CONFIG.MODEL_ID,
-                        messages: messages,
-                        temperature: 0.3
-                    }),
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeout);
-
-                if (!response.ok) {
-                    let errorMsg = `HTTP 错误 ${response.status}`;
-                    try {
-                        const errData = await response.json();
-                        if (response.status === 402 || errData.error?.code === 'insufficient_balance') {
-                            errorMsg = "API 余额不足，请检查账号充值状态";
-                        } else if (response.status === 429) {
-                            errorMsg = "请求过快，请稍后再试";
-                        } else {
-                            errorMsg = errData.error?.message || errorMsg;
-                        }
-                    } catch (e) {}
-                    throw new Error(errorMsg);
-                }
-
-                const result = await response.json();
-                return result.choices[0].message.content;
-
-            } catch (err) {
-                clearTimeout(timeout);
-                if ((err.name === 'AbortError' || err.message.includes('timeout')) && retryCount < CONFIG.MAX_RETRY) {
-                    console.log(`正在进行第 ${retryCount + 1} 次重试...`);
-                    return await callDoubao(prompt, attachments, retryCount + 1);
-                }
-                if (err.name === 'AbortError') throw new Error("请求超时，模型处理图片时间过长，请尝试减少图片数量");
-                throw err;
-            }
-        }
-
-        async function runTask(type) {
-            const facts = document.getElementById('facts').value.trim();
-            if (!facts) return showToast("请先输入客诉描述事实", "warning");
-
-            const btnId = type === 'PLAN' ? 'btnPlan' : 'btnReply';
-            const outputId = type === 'PLAN' ? 'outPlan' : 'outReply';
-            const outputEl = document.getElementById(outputId);
-
-            toggleLoading(btnId, true);
-            
-            // 风格化进度条
-            outputEl.innerHTML = `
-                <div class="flex flex-col items-center justify-center h-full space-y-6 p-8">
-                    <div class="w-full max-w-[200px] relative">
-                        <div class="flex justify-between mb-2">
-                            <span class="text-xs font-bold text-[#4318FF] uppercase tracking-wider">AI Thinking</span>
-                            <span class="text-xs font-bold text-[#4318FF]" id="progress-text">0%</span>
-                        </div>
-                        <div class="w-full bg-[#F4F7FE] rounded-full h-3 overflow-hidden">
-                            <div id="progress-bar" class="bg-gradient-to-r from-[#868CFF] to-[#4318FF] h-3 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(67,24,255,0.4)]" style="width: 0%"></div>
-                        </div>
-                        <p class="text-xs text-[#A3AED0] mt-3 text-center font-medium animate-pulse">
-                            正在深度识别风险点与法律条款...
-                        </p>
-                    </div>
-                </div>
-            `;
-            
-            startProgressBar();
-
-            try {
-                let prompt = "";
-                if (type === 'PLAN') {
-                    prompt = `【事实描述】：${facts}\n\n请作为专家提供内部应对思路：1.性质判定；2.证据力分析；3.赔付建议；4.话术要点。请分点详细陈述，并对**关键结论、法律条款、风险等级**使用加粗（Markdown bold）标注。`;
-                } else {
-                    const planText = document.getElementById('outPlan').innerText;
-                    prompt = `【参考策略】：${planText}\n\n请起草正式的对外答复书。要求语气严谨专业，按标准公文格式排版。`;
-                }
-
-                const response = await callDoubao(prompt, uploadedFiles);
-                
-                stopProgressBar();
-                await new Promise(r => setTimeout(r, 400));
-
-                outputEl.innerHTML = marked.parse(response);
-                
-                showToast("生成成功", "success");
-            } catch (err) {
-                stopProgressBar();
-                outputEl.innerHTML = `<div class="h-full flex items-center justify-center"><span class="text-[#E02020] font-bold bg-[#FFEAEA] px-4 py-2 rounded-xl">生成失败：${err.message}</span></div>`;
-                showToast(err.message, "error");
-            } finally {
-                toggleLoading(btnId, false);
-            }
-        }
-
-        function startProgressBar() {
-            if (progressInterval) clearInterval(progressInterval);
-            let width = 0;
-            const bar = document.getElementById('progress-bar');
-            const text = document.getElementById('progress-text');
-
-            if (!bar || !text) return;
-
-            progressInterval = setInterval(() => {
-                if (width < 30) width += Math.random() * 8;
-                else if (width < 70) width += Math.random() * 4;
-                else if (width < 95) width += Math.random() * 1;
-                else if (width < 99) width += 0.05;
-
-                if (width > 99.5) width = 99.5;
-                
-                bar.style.width = width + '%';
-                text.innerText = Math.floor(width) + '%';
-            }, 300);
-        }
-
-        function stopProgressBar() {
-            if (progressInterval) clearInterval(progressInterval);
-            const bar = document.getElementById('progress-bar');
-            const text = document.getElementById('progress-text');
-            if (bar) bar.style.width = '100%';
-            if (text) text.innerText = '100%';
-        }
-
-        function toggleLoading(btnId, isLoading) {
-            const btn = document.getElementById(btnId);
-            const text = btn.querySelector('.btn-text');
-            const icon = btn.querySelector('.loading-icon');
-            btn.disabled = isLoading;
-            if (isLoading) {
-                text.style.opacity = '0';
-                icon.classList.remove('hidden');
-                updateStatus('AI 分析中', true);
-            } else {
-                text.style.opacity = '1';
-                icon.classList.add('hidden');
-                updateStatus('系统就绪', false);
-            }
-        }
-
-        function updateStatus(msg, isBusy) {
-            document.getElementById('statusText').innerText = msg;
-            
-            // 手机端
-            const mobileDot = document.getElementById('statusDotMobile');
-            
-            // 桌面端
-            const ping = document.getElementById('statusPing');
-            const dot = document.getElementById('statusDot');
-            
-            if (isBusy) {
-                if(ping) ping.classList.remove('hidden');
-                if(dot) dot.className = "relative inline-flex rounded-full h-3 w-3 bg-blue-500";
-                if(mobileDot) mobileDot.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500 animate-pulse";
-                document.getElementById('statusText').className = "text-xs font-bold text-[#4318FF]";
-            } else {
-                if(ping) ping.classList.add('hidden');
-                if(dot) dot.className = "relative inline-flex rounded-full h-3 w-3 bg-[#05CD99]";
-                if(mobileDot) mobileDot.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-[#05CD99]";
-                document.getElementById('statusText').className = "text-xs font-bold text-[#A3AED0]";
-            }
-        }
-
-        function showToast(msg, type) {
-            const t = document.getElementById('toast');
-            
-            let icon = '';
-            if (type === 'success') icon = '<svg class="w-5 h-5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
-            else if (type === 'error') icon = '<svg class="w-5 h-5 text-[#FF5B5B]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
-            else icon = '<svg class="w-5 h-5 text-[#FFB547]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-
-            t.innerHTML = `${icon}<span>${msg}</span>`;
-            
-            t.classList.replace('-translate-y-40', 'translate-y-8');
-            t.classList.replace('opacity-0', 'opacity-100');
-
-            setTimeout(() => {
-                t.classList.replace('translate-y-8', '-translate-y-40');
-                t.classList.replace('opacity-100', 'opacity-0');
-            }, 3000);
-        }
-
-        function toBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        function copyToClipboard(id) {
-            const text = document.getElementById(id).innerText;
-            if (!text || text.includes('等待生成')) return showToast("暂无内容可复制", "warning");
-            navigator.clipboard.writeText(text).then(() => showToast("已复制到剪贴板", "success"));
+            document.getElementById('facts').value = "客户于 2023-10-24 在我司天猫旗舰店购买了 20231024 批次的坚果，拆包后自述发现一小段类似金属丝的异物（约 1.5cm）。客户称食用时划伤了口腔，但目前未提供就医证明。";
+            document.getElementById('demand').value = "赔偿 1000 元";
+            document.getElementById('complainantType').value = "疑似职业打假/恶意高赔";
         }
 
         function resetAll() {
-            if (!confirm("确定要清空所有内容吗？")) return;
             document.getElementById('facts').value = '';
-            document.getElementById('outPlan').innerText = '';
-            document.getElementById('outReply').innerText = '';
-            uploadedFiles = [];
-            renderPreviews();
-            renderPlaceholders();
-            showToast("已重置", "success");
+            document.getElementById('demand').value = '';
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('outPlan').innerHTML = '<div class="text-[#A3AED0] italic flex flex-col items-center justify-center py-20 opacity-50"><svg class="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><p>已重置，等待输入...</p></div>';
+            document.getElementById('outReply').innerHTML = '<p class="text-[#A3AED0] text-center py-10">等待分析完成...</p>';
+            uploadedImages = [];
         }
 
-        function renderPlaceholders() {
-            document.querySelectorAll('[data-placeholder]').forEach(el => {
-                if (!el.textContent.trim()) {
-                    el.innerHTML = `<div class="flex items-center justify-center h-full text-[#A3AED0] italic text-xs">${el.dataset.placeholder}</div>`;
-                }
+        async function analyzeComplaint() {
+            const f = document.getElementById('facts').value.trim();
+            if (!f) {
+                alert("请输入事实描述");
+                return;
+            }
+
+            const btn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const statusPing = document.getElementById('statusPing');
+            const statusText = document.getElementById('statusText');
+            const outPlan = document.getElementById('outPlan');
+            const outReply = document.getElementById('outReply');
+
+            // UI 状态切换
+            btn.disabled = true;
+            btnLoader.classList.remove('hidden');
+            statusPing.classList.remove('hidden');
+
+            const corpType = document.getElementById('corpType').value;
+            const compType = document.getElementById('complainantType').value;
+            const demand = document.getElementById('demand').value;
+            const escalation = document.getElementById('escalation').value;
+
+            // 准备共用内容（带附件）
+            const parts = [];
+            uploadedImages.forEach(img => {
+                parts.push({
+                    inlineData: {
+                        mimeType: img.mimeType,
+                        data: img.data
+                    }
+                });
             });
+
+            try {
+                // 第一步：生成内部应对策略
+                btnText.innerText = "法务风控正在研判...";
+                statusText.innerText = "法务风控正在研判...";
+                outPlan.innerHTML = '<div class="animate-pulse flex flex-col gap-4 py-10"><div class="h-4 bg-gray-100 rounded w-3/4"></div><div class="h-4 bg-gray-100 rounded"></div><div class="h-4 bg-gray-100 rounded w-5/6"></div></div>';
+                outReply.innerHTML = '<p class="text-[#A3AED0] text-center py-10 italic">等待内部思路生成中...</p>';
+
+                const strategyPrompt = `角色：食品企业法务风控专家。  
+任务：生成【内部应对策略】（不对外）。  
+背景信息：  
+- 企业类型：${corpType}  
+- 投诉人疑似：${compType}  
+- 事实描述：${f}  
+- 诉求：${demand}  
+- 升级状态：${escalation}
+
+请输出 Markdown 格式，包含：  
+## 一、性质研判  
+(判断是普通客诉还是职业打假，给出理由)  
+
+## 二、法律风险与抗辩点  
+(针对事实，分析法律责任，标签瑕疵还是食安事故？)  
+
+## 三、处置建议  
+(具体怎么做？退货？赔偿？拒绝？)  
+
+## 四、谈话话术建议  
+(红线是什么？怎么怼回去或怎么安抚？)  
+
+## 五、所需证据清单  
+(我们需要去查什么？)  `;
+
+                const strategyParts = [...parts, { text: strategyPrompt }];
+                const strategyResult = await callGemini(strategyResultPrompt => strategyResultPrompt, strategyParts, strategyPrompt);
+                outPlan.innerHTML = marked.parse(strategyResult);
+
+                // 第二步：生成对外答复函
+                btnText.innerText = "公关专家正在撰写答复函...";
+                statusText.innerText = "公关专家正在撰写答复函...";
+                outReply.innerHTML = '<div class="animate-pulse flex flex-col gap-3"><div class="h-3 bg-gray-100 rounded"></div><div class="h-3 bg-gray-100 rounded w-1/2"></div></div>';
+
+                const replyPrompt = `角色：资深客服公关专家。  
+任务：基于客诉事实和内部策略，写一封【对外正式回复函】。  
+要求：语气专业、克制、有理有据，不卑不亢。适合发给消费者或监管部门。    
+
+客诉事实：${f}  
+内部策略参考：${strategyResult}    
+
+输出 Markdown 格式：  
+## 关于用户反馈[产品名]问题的处理说明  
+(正文内容...)  `;
+
+                const replyResult = await callGemini(null, [{ text: replyPrompt }], replyPrompt);
+                outReply.innerHTML = marked.parse(replyResult);
+
+            } catch (error) {
+                console.error(error);
+                outPlan.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-xl">调用失败: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = "重新开始专家研判";
+                btnLoader.classList.add('hidden');
+                statusPing.classList.add('hidden');
+                statusText.innerText = "系统就绪";
+            }
         }
 
-        function exportToDoc() {
-            const content = document.getElementById('outReply').innerText;
-            if (content.length < 20) return showToast("内容过短，无法导出", "warning");
-            const blob = new Blob(['\ufeff' + content], { type: 'application/msword' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `答复函_${Date.now()}.doc`;
-            a.click();
-            URL.revokeObjectURL(url);
+        async function callGemini(dummy, parts, systemPrompt, retries = 5) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: parts.map(p => p.inlineData ? p : { text: p.text }) }],
+                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!content) throw new Error("API 返回结果为空");
+                    return content;
+                } catch (err) {
+                    if (i === retries - 1) throw err;
+                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                }
+            }
+        }
+
+        async function copyResult(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.innerText;
+            
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const btn = event.currentTarget;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                setTimeout(() => btn.innerHTML = originalHTML, 2000);
+            } catch (err) {
+                console.error('无法复制', err);
+            }
         }
     </script>
 </body>
 </html>
-
