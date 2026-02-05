@@ -3,120 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI客诉应对助手 - Cloudflare 极速版</title>
-    <!-- Tailwind CSS -->
+    <title>AI 客诉应对助手 - 专业风控版</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Marked.js 用于渲染 Markdown -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 引入 Plus Jakarta Sans 字体以获得更现代的外观 -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
         :root {
-            --primary: #2563eb;
+            --primary: #4318FF; /* 参考图中深邃的蓝紫色 */
+            --secondary: #6AD2FF;
+            --accent-purple: #7551FF;
+            --accent-green: #05CD99;
+            --bg-color: #F4F7FE;
         }
 
         body {
-            font-family: 'Inter', "PingFang SC", "Microsoft YaHei", sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
+            font-family: 'Plus Jakarta Sans', "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            color: #2B3674; /* 深色文字 */
         }
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+        /* 现代卡片风格 - 大圆角，柔和阴影 */
+        .modern-card {
+            background: #ffffff;
+            border-radius: 30px; /* 30px 大圆角 */
+            box-shadow: 0px 20px 40px rgba(112, 144, 176, 0.08);
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        /* 输入框风格 - 极简，无边框，浅背景 */
+        .modern-input {
+            background-color: #F8F9FC; /* 极浅的灰蓝背景 */
+            border: 1px solid transparent;
+            border-radius: 16px;
+            color: #2B3674;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .modern-input:focus {
+            background-color: #ffffff;
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(67, 24, 255, 0.1);
+        }
+        .modern-input::placeholder {
+            color: #A3AED0;
+        }
+
+        /* 按钮风格 */
+        .btn-primary {
+            background: linear-gradient(135deg, #868CFF 0%, #4318FF 100%);
+            border-radius: 16px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(67, 24, 255, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(67, 24, 255, 0.3);
+        }
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: var(--primary);
+            border: 2px solid #F4F7FE;
+            border-radius: 16px;
+            font-weight: 700;
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background: #F4F7FE;
+            color: #2B3674;
         }
 
         /* 滚动条美化 */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        .input-focus:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #E0E5F2;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #A3AED0;
         }
 
-        /* Markdown 内容样式优化 */
-        .prose h1, .prose h2, .prose h3 { color: #1e293b; font-weight: 700; margin-top: 1em; margin-bottom: 0.5em; }
-        .prose ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1em; }
-        .prose ol { list-style-type: decimal; padding-left: 1.2em; margin-bottom: 1em; }
-        .prose p { margin-bottom: 0.8em; line-height: 1.6; }
-        .prose strong { color: #0f172a; font-weight: 700; }
-        .prose blockquote { border-left: 4px solid #e2e8f0; padding-left: 1em; color: #64748b; font-style: italic; background: #f8fafc; padding-top: 0.5em; padding-bottom: 0.5em;}
-
-        .img-container { position: relative; display: inline-block; }
+        .img-container {
+            position: relative;
+            transition: transform 0.2s;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .img-container:hover {
+            transform: scale(1.05);
+        }
         .img-remove {
-            position: absolute; top: -6px; right: -6px;
-            background: #ef4444; color: white; border-radius: 50%;
-            width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
-            font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
         }
 
-        .status-pulse { animation: pulse-blue 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse-blue {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .5; transform: scale(1.2); }
+        /* 标签风格 */
+        .badge {
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
+        .badge-purple { background: #F4F0FF; color: #4318FF; }
+        .badge-green { background: #E6FFFA; color: #05CD99; }
+        .badge-blue { background: #EBF8FF; color: #2B6CB0; }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-spin-slow { animation: spin 2s linear infinite; }
     </style>
 </head>
-<body class="min-h-screen py-8">
-    <div class="max-w-6xl mx-auto px-4">
-        
-        <!-- 网络诊断面板 -->
-        <div class="mb-6 p-4 bg-slate-800 rounded-xl text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
-            <div>
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="w-2 h-2 rounded-full bg-blue-400" id="diagDot"></span>
-                    <h3 class="font-bold text-sm">☁️ Cloudflare 极速链路</h3>
-                </div>
-                <p class="text-xs text-slate-400 font-mono" id="currentUrlDisplay">正在检测配置...</p>
-            </div>
-            <button onclick="testConnection()" id="btnTestConn" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold transition-all border border-slate-600">
-                测试连通性
-            </button>
-        </div>
-
+<body class="min-h-screen py-6 px-4 md:px-8">
+    
+    <div class="max-w-[1400px] mx-auto">
         <!-- 头部导航 -->
-        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">AI 客诉应对助手 <span class="text-blue-600 text-sm font-normal ml-2">Cloudflare版</span></h1>
-                <p class="text-slate-500 mt-1 text-sm">已接入 Cloudflare Workers | 解除响应时长限制 | 深度研判</p>
-                <p class="text-[10px] text-slate-400 mt-1">注意：深度思考可能需要 20-30 秒，请耐心等待。</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <div id="statusIndicator" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-xs font-medium text-slate-600 border border-slate-200">
-                    <div class="w-2 h-2 rounded-full bg-green-500" id="statusDot"></div>
-                    <span id="statusText">后端连接就绪</span>
+        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex flex-col">
+                <div class="flex items-center gap-4">
+                    <!-- 图标背景改为柔和的圆角矩形 -->
+                    <div class="bg-gradient-to-br from-[#05CD99] to-[#02A676] text-white p-3.5 rounded-[20px] shadow-lg shadow-emerald-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-[#1B2559] tracking-tight">AI 客诉应对助手</h1>
+                        <p class="text-[#A3AED0] text-sm mt-1 font-medium">
+                            作者：李川 <span class="mx-2">|</span> 如有疑问可企业微信联系我
+                        </p>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="flex items-center gap-4 bg-white p-2 pr-4 rounded-[20px] shadow-sm">
+                <div id="statusIndicator" class="flex items-center gap-2 px-3 py-1.5">
+                    <div class="relative flex h-3 w-3">
+                      <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 hidden"></span>
+                      <span id="statusDot" class="relative inline-flex rounded-full h-3 w-3 bg-[#05CD99]"></span>
+                    </div>
+                    <span id="statusText" class="text-xs font-bold text-[#A3AED0]">系统就绪</span>
+                </div>
+                <div class="h-6 w-[1px] bg-[#E0E5F2]"></div>
+                <button onclick="resetAll()" class="text-xs font-bold text-[#E02020] hover:text-red-600 transition-colors flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    重置
+                </button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <!-- 左侧：输入区域 -->
             <div class="lg:col-span-5 space-y-6">
-                <section class="glass-panel p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg font-bold text-sm">1</span>
-                        <h2 class="font-semibold text-slate-800">投诉详情输入</h2>
+                <!-- 详情录入卡片 -->
+                <section class="modern-card p-8">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-xl font-bold text-[#1B2559]">投诉详情录入</h2>
+                        <div class="bg-[#F4F7FE] p-2 rounded-xl text-[#4318FF]">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">企业类型</label>
-                                <select id="corpType" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm input-focus transition-all">
-                                    <option>餐饮团餐</option>
+                                <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">企业类型</label>
+                                <select id="corpType" class="modern-input w-full px-4 py-3.5 text-sm cursor-pointer appearance-none">
                                     <option>食品生产企业</option>
+                                    <option>餐饮门店</option>
                                     <option>食品贸易/经销</option>
                                     <option>仓储物流/冷链</option>
                                     <option>其他</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">投诉人类型</label>
-                                <select id="complainantType" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm input-focus transition-all">
+                                <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">投诉人类型</label>
+                                <select id="complainantType" class="modern-input w-full px-4 py-3.5 text-sm cursor-pointer appearance-none">
                                     <option>普通消费者</option>
                                     <option>疑似职业打假/恶意高赔</option>
                                     <option>渠道客户/经销商</option>
@@ -127,430 +215,13 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1 text-red-500">客诉描述（事实+诉求）*</label>
-                            <textarea id="facts" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm min-h-[120px] input-focus transition-all" placeholder="请详细描述：发生时间、涉及批次、具体问题细节、沟通现状及对方诉求..."></textarea>
-                            <div class="mt-2 flex justify-between">
-                                <span class="text-[10px] text-slate-400 italic">建议要素：时间+批次+问题+诉求+现状</span>
-                                <button onclick="fillStandardExample()" class="text-[11px] text-blue-600 hover:underline">填入标准案例</button>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">升级情况</label>
-                            <select id="escalation" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm input-focus transition-all">
-                                <option value="未升级">未升级（内部处理中）</option>
-                                <option value="平台介入">已升级至电商平台/三方平台</option>
-                                <option value="监管介入">已升级至市监局/消协</option>
-                                <option value="媒体介入">已引发媒体关注/社交平台曝光</option>
-                            </select>
-                        </div>
-
-                        <div class="pt-2">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">附件证据 (图片分析)</label>
-                            <div class="relative">
-                                <input type="file" id="fileInput" multiple class="hidden" accept="image/*">
-                                <button onclick="document.getElementById('fileInput').click()" class="w-full border-2 border-dashed border-slate-200 rounded-xl py-6 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 transition-colors group">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-400 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    <span class="text-sm text-slate-500" id="fileCountText">点击上传图片证据（可选）</span>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-xs font-bold text-[#A3AED0] uppercase tracking-wide">
+                                    客诉描述 <span class="text-[#E02020]">*</span>
+                                </label>
+                                <button onclick="fillStandardExample()" class="text-xs font-bold text-[#4318FF] hover:underline flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    填入示例
                                 </button>
                             </div>
-                            <div id="filePreview" class="mt-2 flex flex-wrap gap-2"></div>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 flex flex-wrap gap-2">
-                        <button id="btnPlan" class="flex-1 min-w-[140px] bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                            <span>深度生成策略</span>
-                        </button>
-                        <button id="btnReply" class="flex-1 min-w-[140px] border border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                            <span>起草专业答复</span>
-                        </button>
-                    </div>
-                </section>
-
-                <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl shadow-sm">
-                    <div class="flex items-center gap-2 mb-1">
-                        <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                        </svg>
-                        <h4 class="text-xs font-bold text-amber-800 uppercase">合规与风险提示</h4>
-                    </div>
-                    <p class="text-xs text-amber-700 leading-relaxed">
-                        本助手生成内容仅供参考。大额赔偿或涉及监管函件，<strong>请务必经过法务部门核准</strong>。
-                    </p>
-                </div>
-            </div>
-
-            <!-- 右侧：输出区域 -->
-            <div class="lg:col-span-7 space-y-6">
-                <!-- 内部思路板块 -->
-                <section class="glass-panel rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[400px]">
-                    <div class="bg-slate-900 px-6 py-3 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-white text-sm">深度研判思路 (对内)</h3>
-                        </div>
-                        <button onclick="copyToClipboard('outPlan')" class="text-xs text-slate-400 hover:text-white font-medium">复制内容</button>
-                    </div>
-                    <div class="p-6 flex-grow flex flex-col bg-white">
-                        <div id="outPlan" class="prose prose-sm max-w-none text-slate-700 custom-scrollbar overflow-y-auto max-h-[600px] flex-grow" data-placeholder="点击左侧按钮开始生成深度研判报告..."></div>
-                    </div>
-                </section>
-
-                <!-- 对外回复板块 -->
-                <section class="glass-panel rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[300px]">
-                    <div class="bg-blue-600 px-6 py-3 flex items-center justify-between border-b border-blue-500">
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-white text-sm">正式答复函 (对外)</h3>
-                            <span class="px-2 py-0.5 rounded bg-blue-500 text-[10px] font-bold text-blue-100 uppercase">EXTERNAL</span>
-                        </div>
-                        <div class="flex gap-3">
-                            <button onclick="copyToClipboard('outReply')" class="text-xs text-blue-100 hover:text-white font-medium">复制全文</button>
-                            <button id="btnExport" class="text-xs text-blue-100 hover:text-white font-medium">导出 Word</button>
-                        </div>
-                    </div>
-                    <div class="p-6 flex-grow flex flex-col bg-white">
-                        <div id="outReply" class="prose prose-sm max-w-none text-slate-700 custom-scrollbar overflow-y-auto max-h-[400px] flex-grow" data-placeholder="策略生成后，可一键转化起草正式对外函件..."></div>
-                    </div>
-                </section>
-            </div>
-        </div>
-    </div>
-
-    <!-- 弹窗：消息通知 -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-2xl bg-slate-900 text-white text-sm font-medium transform translate-y-20 opacity-0 transition-all duration-300"></div>
-
-    <script>
-        /** =========================
-         * ① 配置区域
-         * ========================= */
-        
-        // ✅ 核心修正：切换回 Cloudflare Workers 节点（解决 Vercel 访问不稳或超时问题）
-        const BACKEND_URL = "https://jolly-hill-f849.820306074.workers.dev";
-        
-        // 你的推理接入点 ID (EP ID)
-        const MODEL_ID = "ep-m-20260129125546-l8qvt"; 
-        
-        let uploadedImages = []; 
-
-        window.onload = () => {
-            initPlaceholder();
-            setupEventListeners();
-            // 显示当前配置的 URL 方便调试
-            document.getElementById('currentUrlDisplay').innerText = `API 接入点: ${BACKEND_URL.substring(0, 35)}...`;
-        };
-
-        // 🟢 网络连通性测试函数
-        async function testConnection() {
-            const btn = document.getElementById('btnTestConn');
-            const dot = document.getElementById('diagDot');
-            btn.innerText = "测试中...";
-            btn.disabled = true;
-            
-            try {
-                // Cloudflare 对 GET 请求会响应，只要有响应（哪怕404/405）都说明网络是通的
-                const res = await fetch(BACKEND_URL, { method: 'OPTIONS' }); 
-                
-                showToast("✅ 连接成功！后端服务正常响应。", "success");
-                dot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]";
-            } catch (e) {
-                if (e.message.includes("Failed to fetch")) {
-                    showToast("❌ 连接失败：网络被拦截", "error");
-                    dot.className = "w-2 h-2 rounded-full bg-red-500";
-                    alert("⚠️ 浏览器无法连接 Cloudflare。\n\n原因：workers.dev 域名可能被你的网络环境阻断。\n建议：尝试开启代理/梯子，或者切换手机热点测试。");
-                } else {
-                    showToast("✅ 连接成功！(状态非200但已连通)", "success");
-                    dot.className = "w-2 h-2 rounded-full bg-green-500";
-                }
-            } finally {
-                btn.innerText = "测试连通性";
-                btn.disabled = false;
-            }
-        }
-
-        function fillStandardExample() {
-            const example = "【时间】：2024年1月15日\n【涉及产品】：批次为231102的‘经典原味饼干’\n【客诉事实】：顾客反馈在产品中发现黑色异物（疑似2cm长硬质塑料片），称其小孩吞食后不适，仅提供一张照片且背景模糊，拒绝退回实物检测。\n【诉求】：要求赔偿1000元并退款，否则投诉到市监局并公开曝光。\n【沟通现状】：客服致电提出补偿50元券，被拒绝。";
-            document.getElementById('facts').value = example;
-        }
-
-        function initPlaceholder() {
-            document.querySelectorAll('[data-placeholder]').forEach(el => {
-                if (!el.textContent.trim()) {
-                    el.innerHTML = `<span class="text-slate-400 italic">${el.dataset.placeholder}</span>`;
-                }
-            });
-        }
-
-        function setupEventListeners() {
-            const fileInput = document.getElementById('fileInput');
-            fileInput.onchange = handleFileSelect;
-            document.getElementById('btnPlan').onclick = () => generateTask('PLAN');
-            document.getElementById('btnReply').onclick = () => generateTask('REPLY');
-            document.getElementById('btnExport').onclick = exportToDoc;
-        }
-
-        async function handleFileSelect(e) {
-            const files = Array.from(e.target.files);
-            for (let file of files) {
-                // 虽然 Cloudflare 支持更大包体，但为了稳妥建议不超过 2MB
-                if (file.size > 2 * 1024 * 1024) { 
-                    showToast(`文件 ${file.name} 超过 2MB，建议使用更小的图片`, 'error');
-                    continue;
-                }
-                const base64 = await toBase64(file);
-                uploadedImages.push(base64);
-            }
-            renderImagePreviews();
-        }
-
-        function renderImagePreviews() {
-            const preview = document.getElementById('filePreview');
-            preview.innerHTML = '';
-            uploadedImages.forEach((base64, index) => {
-                const container = document.createElement('div');
-                container.className = 'img-container w-12 h-12 rounded-lg border border-slate-200 bg-cover bg-center';
-                container.style.backgroundImage = `url(${base64})`;
-                const removeBtn = document.createElement('div');
-                removeBtn.className = 'img-remove';
-                removeBtn.innerHTML = '×';
-                removeBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    uploadedImages.splice(index, 1);
-                    renderImagePreviews();
-                };
-                container.appendChild(removeBtn);
-                preview.appendChild(container);
-            });
-            document.getElementById('fileCountText').innerText = uploadedImages.length > 0 ? `已加载 ${uploadedImages.length} 个附件` : '点击上传图片证据（可选）';
-        }
-
-        /** ============ 核心逻辑：后端请求 ============ */
-        const wait = ms => new Promise(res => setTimeout(res, ms));
-
-        async function callBackendWithRetry(prompt, type, attachments = []) {
-            const maxRetries = 2; // CF 比较稳定，减少重试
-            let lastError = null;
-
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    if (i > 0) {
-                        updateUIStatus(`正在请求后端，请稍候... (第 ${i+1} 次尝试)`);
-                        await wait(2000 * i);
-                    }
-                    return await performApiCall(prompt, type, attachments);
-                } catch (error) {
-                    console.warn(`Attempt ${i+1} failed:`, error.message);
-                    lastError = error;
-                    // 致命错误不重试
-                    if (error.message.includes("400") || error.message.includes("401") || error.message.includes("413")) throw error;
-                }
-            }
-            throw lastError || new Error("请求失败，请检查网络或稍后重试");
-        }
-
-        async function performApiCall(prompt, type, attachments) {
-            const hasImages = attachments && attachments.length > 0;
-            
-            const internalSystem = `你是一个深耕食品安全法与企业合规的资深风控专家。
-你的任务是为内部管理层提供【深度且全面】的研判报告。请使用 Markdown 格式输出。
-结构要求：
-1. **风险定级**：红/黄/蓝等级，并阐述理由。
-2. **法律条文对照**：引用《食安法》、《消保法》具体条文。
-3. **证据链检视**：分析现有证据薄弱点。
-4. **谈判口径建议**：给出针对性的博弈策略。
-5. **舆情预警**：应对方案。`;
-
-            const externalSystem = `你是一个专业的公关与客诉法务专家。请起草一份具备“高度防御性”的正式对外答复函。必须使用专业、严谨、不认责的话术。请使用 Markdown 格式。`;
-
-            const systemMsg = (type === 'PLAN') ? internalSystem : externalSystem;
-
-            let messages = [
-                { role: "system", content: systemMsg }
-            ];
-
-            if (hasImages) {
-                messages.push({
-                    role: "user",
-                    content: [
-                        { type: "text", text: prompt },
-                        ...attachments.map(url => ({ 
-                            type: "image_url", 
-                            image_url: { url: url } 
-                        }))
-                    ]
-                });
-            } else {
-                messages.push({ role: "user", content: prompt });
-            }
-
-            // Cloudflare 节点转发 Payload
-            const payload = {
-                model: MODEL_ID,
-                messages: messages,
-                temperature: 0.3,
-                max_tokens: 4096, // 恢复到 4096，因为 Cloudflare 不会轻易超时
-                stream: false
-            };
-
-            // 发送请求，不再设人为超时
-            const response = await fetch(BACKEND_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                let errorMsg = `后端错误 ${response.status}`;
-                try {
-                    const jsonErr = JSON.parse(errorText);
-                    if (jsonErr.error && jsonErr.error.message) errorMsg = jsonErr.error.message;
-                } catch (e) {}
-                throw new Error(errorMsg);
-            }
-
-            const data = await response.json();
-            
-            if (data.choices && data.choices.length > 0) {
-                return data.choices[0].message.content;
-            } else {
-                throw new Error("模型返回了空内容");
-            }
-        }
-
-        async function generateTask(type) {
-            const facts = document.getElementById('facts').value.trim();
-            if (!facts) {
-                showToast('请输入描述内容', 'warning');
-                return;
-            }
-
-            // 提示用户耐心等待 (Cloudflare 可能会跑 20秒+)
-            updateUIState(true, 'AI 深度研判中 (约需20-30秒，请勿关闭)...');
-            const outPlan = document.getElementById('outPlan');
-            const outReply = document.getElementById('outReply');
-            const rawPlanText = outPlan.innerText; 
-
-            try {
-                if (type === 'PLAN') {
-                    const corp = document.getElementById('corpType').value;
-                    const user = document.getElementById('complainantType').value;
-                    const esc = document.getElementById('escalation').value;
-                    const prompt = `【企业背景】：${corp}\n【投诉人】：${user}\n【现状】：${esc}\n【详情】：${facts}\n\n请输出完整的深度研判策略报告。`;
-                    
-                    outPlan.innerHTML = "<div class='flex items-center gap-2 text-blue-600'><div class='w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin'></div><span>正在连接云端大脑分析中 (请耐心等待)...</span></div>";
-                    
-                    const result = await callBackendWithRetry(prompt, 'PLAN', uploadedImages);
-                    outPlan.innerHTML = marked.parse(result);
-                    showToast('研判报告生成成功', 'success');
-                } else {
-                    if (rawPlanText.length < 15 || rawPlanText.includes("点击左侧")) {
-                        showToast('请先生成内部思路', 'warning');
-                        updateUIState(false);
-                        return;
-                    }
-                    const prompt = `【客诉 facts】：${facts}\n【研判策略】：${rawPlanText}\n\n请起草正式对外公函。`;
-                    outReply.innerHTML = "<div class='flex items-center gap-2 text-blue-600'><div class='w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin'></div><span>正在撰写正式公函...</span></div>";
-                    
-                    const result = await callBackendWithRetry(prompt, 'REPLY', uploadedImages);
-                    outReply.innerHTML = marked.parse(result);
-                    showToast('答复函起草完毕', 'success');
-                }
-            } catch (err) {
-                showToast(`生成异常`, 'error');
-                console.error(err);
-                const target = type === 'PLAN' ? outPlan : outReply;
-                target.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">
-                    <strong class="flex items-center gap-2">⚠️ 生成失败</strong>
-                    <div class="mt-2 font-bold">${err.message}</div>
-                    <div class="mt-2 text-xs text-red-800 bg-red-100 p-2 rounded">
-                        <strong>如果你看到 "Failed to fetch"：</strong><br>
-                        Cloudflare (workers.dev) 域名在当前网络可能被拦截。<br>
-                        请尝试开启【代理软件】或者切换到【手机热点】再试。
-                    </div>
-                </div>`;
-            } finally {
-                updateUIState(false);
-            }
-        }
-
-        /** ============ UI 辅助 ============ */
-        function updateUIState(isBusy, text = '准备就绪') {
-            const statusText = document.getElementById('statusText');
-            const statusDot = document.getElementById('statusDot');
-            statusText.textContent = text;
-            if (isBusy) {
-                statusDot.className = 'w-2 h-2 rounded-full bg-blue-500 status-pulse';
-                document.getElementById('btnPlan').disabled = true;
-                document.getElementById('btnReply').disabled = true;
-                document.body.style.cursor = 'wait';
-            } else {
-                statusDot.className = 'w-2 h-2 rounded-full bg-green-500';
-                document.getElementById('btnPlan').disabled = false;
-                document.getElementById('btnReply').disabled = false;
-                document.body.style.cursor = 'default';
-            }
-        }
-
-        function updateUIStatus(text) {
-            document.getElementById('statusText').textContent = text;
-        }
-
-        function showToast(msg, type = 'info') {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-2xl shadow-2xl text-white text-sm font-medium transform transition-all duration-300 opacity-100 translate-y-0`;
-            if (type === 'error') t.classList.add('bg-red-600');
-            else if (type === 'success') t.classList.add('bg-green-600');
-            else if (type === 'warning') t.classList.add('bg-amber-600');
-            else t.classList.add('bg-slate-900');
-            setTimeout(() => { t.classList.replace('translate-y-0', 'translate-y-20'); t.classList.replace('opacity-100', 'opacity-0'); }, 4000);
-        }
-
-        function toBase64(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-            });
-        }
-
-        function copyToClipboard(id) {
-            const text = document.getElementById(id).innerText;
-            if (text.length < 5) return;
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('已复制内容', 'success');
-            }).catch(() => {
-                const el = document.createElement('textarea');
-                el.value = text;
-                document.body.appendChild(el);
-                el.select();
-                document.execCommand('copy');
-                document.body.removeChild(el);
-                showToast('已复制内容', 'success');
-            });
-        }
-
-        function exportToDoc() {
-            const content = document.getElementById('outReply').innerHTML;
-            if (content.length < 20) return;
-            const htmlContent = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset='utf-8'><title>客诉答复函</title></head>
-                <body>${content}</body>
-                </html>`;
-            
-            const blob = new Blob([htmlContent], { type: 'application/msword' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `客诉答复函_${new Date().toISOString().slice(0,10)}.doc`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-    </script>
-</body>
-</html>
+                            <textarea id="facts" class="modern-input w-full px-5 py-4 text-sm min-h-[160px] leading
