@@ -224,4 +224,467 @@
                                     填入示例
                                 </button>
                             </div>
-                            <textarea id="facts" class="modern-input w-full px-5 py-4 text-sm min-h-[160px] leading
+                            <textarea id="facts" class="modern-input w-full px-5 py-4 text-sm min-h-[160px] leading-relaxed resize-none" placeholder="请详细描述事实，例如：发生时间、涉及批次、具体异物描述..."></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">事件等级 / 升级情况</label>
+                            <select id="escalation" class="modern-input w-full px-4 py-3.5 text-sm cursor-pointer appearance-none">
+                                <option value="未升级">未升级（内部处理中）</option>
+                                <option value="平台介入">已升级至电商平台/三方平台</option>
+                                <option value="监管介入">已升级至市监局/消协</option>
+                                <option value="媒体介入">已引发媒体关注/社交平台曝光</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-[#A3AED0] uppercase mb-2 tracking-wide">附件证据</label>
+                            <div class="relative group">
+                                <input type="file" id="fileInput" multiple class="hidden" accept="image/*,application/pdf">
+                                <div onclick="document.getElementById('fileInput').click()" class="w-full border-2 border-dashed border-[#E0E5F2] rounded-2xl py-6 flex flex-col items-center justify-center gap-3 hover:bg-[#F4F7FE] hover:border-[#4318FF] transition-all cursor-pointer group">
+                                    <div class="w-10 h-10 bg-[#F4F7FE] rounded-full flex items-center justify-center text-[#4318FF] group-hover:scale-110 transition-transform">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="text-xs font-bold text-[#2B3674] block">点击上传图片/PDF</span>
+                                        <span class="text-[10px] text-[#A3AED0] mt-1">支持 JPG, PNG, PDF (Max 10MB)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 预览区域 -->
+                            <div id="filePreview" class="mt-4 flex flex-wrap gap-3"></div>
+                            <div id="fileCountText" class="text-[10px] text-[#A3AED0] mt-2 font-medium pl-1">暂无文件</div>
+                        </div>
+                    </div>
+
+                    <!-- 按钮区域 -->
+                    <div class="mt-10 flex flex-col gap-4">
+                        <button id="btnPlan" class="btn-primary w-full py-4 text-sm flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <span class="btn-text">生成内部应对思路</span>
+                            <div class="loading-icon hidden"><svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
+                        </button>
+                        <button id="btnReply" class="btn-secondary w-full py-4 text-sm flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <span class="btn-text">生成对外答复</span>
+                            <div class="loading-icon hidden"><svg class="animate-spin h-5 w-5 text-[#4318FF]" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 法律声明小卡片 -->
+                <div class="p-5 rounded-[20px] bg-gradient-to-r from-[#FFF5F5] to-[#FFFBFB] border border-[#FFEAEA] flex gap-4 shadow-sm">
+                    <div class="text-[#E02020] bg-[#FFEAEA] p-2 rounded-lg h-fit">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-[#E02020] mb-1">合规免责声明</h4>
+                        <p class="text-xs text-[#E02020] opacity-80 leading-relaxed text-justify">
+                            本内容仅供内部风控参考。正式对外函件务必经法务审核。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：输出区域 -->
+            <div class="lg:col-span-7 space-y-6">
+                <!-- 内部思路板块 -->
+                <section class="modern-card overflow-hidden flex flex-col h-[500px] border border-transparent hover:border-[#F4F7FE]">
+                    <div class="p-6 pb-2 flex items-center justify-between border-b border-[#F4F7FE]">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-[#F4F0FF] p-2 rounded-xl text-[#4318FF]">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-[#1B2559] text-lg">内部研判 & 策略</h3>
+                                <p class="text-[10px] text-[#A3AED0] font-bold uppercase tracking-wider">Internal Strategy</p>
+                            </div>
+                        </div>
+                        <div class="badge badge-purple">仅供内部传阅</div>
+                    </div>
+                    
+                    <div class="p-6 bg-white flex-grow flex flex-col relative overflow-hidden">
+                        <!-- 装饰背景圆 -->
+                        <div class="absolute -right-10 -top-10 w-32 h-32 bg-[#F4F0FF] rounded-full opacity-50 blur-xl pointer-events-none"></div>
+
+                        <div id="outPlan" class="text-sm text-[#2B3674] whitespace-pre-wrap leading-7 custom-scrollbar overflow-y-auto h-full pr-2 relative z-10" data-placeholder="等待生成内部策略...">
+                            <!-- Placeholder content handled by JS -->
+                        </div>
+                        
+                        <!-- 底部工具栏 -->
+                        <div class="absolute bottom-4 right-6 z-20">
+                             <button onclick="copyToClipboard('outPlan')" class="bg-white border border-[#E0E5F2] hover:bg-[#F4F7FE] text-[#2B3674] text-xs font-bold py-2 px-4 rounded-xl shadow-sm transition-colors flex items-center gap-2">
+                                <svg class="w-3.5 h-3.5 text-[#4318FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                复制全文
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 对外回复板块 -->
+                <section class="modern-card overflow-hidden flex flex-col h-[400px]">
+                    <div class="p-6 pb-2 flex items-center justify-between border-b border-[#F4F7FE]">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-[#E6FFFA] p-2 rounded-xl text-[#05CD99]">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-[#1B2559] text-lg">对外答复函</h3>
+                                <p class="text-[10px] text-[#A3AED0] font-bold uppercase tracking-wider">Formal Reply</p>
+                            </div>
+                        </div>
+                        <div class="badge badge-green">可对外发送</div>
+                    </div>
+                    <div class="p-6 bg-[#FAFCFE] flex-grow flex flex-col relative">
+                        <div id="outReply" class="text-sm text-[#2B3674] font-medium whitespace-pre-wrap leading-7 custom-scrollbar overflow-y-auto h-full pr-2" data-placeholder="等待生成正式公文..."></div>
+                        
+                        <div class="absolute bottom-4 right-6 flex gap-3 z-20">
+                            <button onclick="copyToClipboard('outReply')" class="bg-white border border-[#E0E5F2] hover:bg-[#F4F7FE] text-[#2B3674] text-xs font-bold py-2 px-4 rounded-xl shadow-sm transition-colors">
+                                复制
+                            </button>
+                            <button id="btnExport" class="bg-[#2B3674] hover:bg-[#1B2559] text-white text-xs font-bold py-2 px-4 rounded-xl shadow-lg shadow-blue-900/20 transition-all flex items-center gap-2">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                导出 Word
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗通知 -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-50 px-6 py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.2)] bg-[#1B2559] text-white text-sm font-bold transform -translate-y-40 opacity-0 transition-all duration-500 flex items-center gap-3">
+        <!-- Icon dynamically added via JS -->
+    </div>
+
+    <script>
+        /**
+         * 保持核心逻辑代码 100% 不变
+         */
+        const CONFIG = {
+            API_KEY: "4bcbe285-c162-4c7d-905c-941a3b030ba5",
+            ENDPOINT: "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
+            MODEL_ID: "ep-m-20260129125546-l8qvt",
+            MAX_RETRY: 2
+        };
+
+        let uploadedFiles = [];
+        let progressInterval; 
+
+        window.onload = () => {
+            renderPlaceholders();
+            initListeners();
+        };
+
+        function initListeners() {
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+            document.getElementById('btnPlan').addEventListener('click', () => runTask('PLAN'));
+            document.getElementById('btnReply').addEventListener('click', () => runTask('REPLY'));
+            document.getElementById('btnExport').addEventListener('click', exportToDoc);
+        }
+
+        function fillStandardExample() {
+            const example = `【发生时间】：2024年1月20日\n【涉及产品】：批次号 240105-A 的“坚果果干混合包”\n【核心事实】：袋内发现一枚直径约1cm的金属垫圈，声称导致其牙齿隐裂。目前仅提供模糊照片。\n【对方诉求】：赔偿医疗费及惩罚性赔偿共计5000元。`;
+            document.getElementById('facts').value = example;
+            showToast("已填充标准案例数据", "success");
+        }
+
+        async function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            for (let file of files) {
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast(`文件 ${file.name} 超过 10MB`, 'error');
+                    continue;
+                }
+                try {
+                    const base64 = await toBase64(file);
+                    uploadedFiles.push({ name: file.name, data: base64, type: file.type });
+                } catch (err) {
+                    showToast("文件读取失败", "error");
+                }
+            }
+            renderPreviews();
+        }
+
+        function renderPreviews() {
+            const container = document.getElementById('filePreview');
+            const countText = document.getElementById('fileCountText');
+            container.innerHTML = '';
+            
+            uploadedFiles.forEach((file, index) => {
+                const div = document.createElement('div');
+                div.className = 'img-container w-16 h-16 rounded-xl border border-[#E0E5F2] bg-cover bg-center shadow-sm relative';
+                if (file.type === 'application/pdf') {
+                    div.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center bg-[#F4F7FE] text-[#E02020]"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg><span class="text-[8px] font-bold mt-1">PDF</span></div>`;
+                } else {
+                    div.style.backgroundImage = `url(${file.data})`;
+                }
+                const remove = document.createElement('div');
+                remove.className = 'img-remove';
+                remove.innerHTML = '×';
+                remove.onclick = (e) => {
+                    e.stopPropagation();
+                    uploadedFiles.splice(index, 1);
+                    renderPreviews();
+                };
+                div.appendChild(remove);
+                container.appendChild(div);
+            });
+
+            if (uploadedFiles.length > 0) {
+                countText.innerText = `已加载 ${uploadedFiles.length} 个附件`;
+                countText.className = "text-[10px] text-[#05CD99] mt-2 font-bold pl-1";
+            } else {
+                countText.innerText = "暂无文件";
+                countText.className = "text-[10px] text-[#A3AED0] mt-2 font-medium pl-1";
+            }
+        }
+
+        async function callDoubao(prompt, attachments = [], retryCount = 0) {
+            const controller = new AbortController();
+            const timeoutDuration = 120000;
+            const timeout = setTimeout(() => controller.abort(), timeoutDuration);
+
+            try {
+                const messages = [
+                    { role: "system", content: "你是一个深耕食品安全法律与企业风控的专家。请分析证据并给出合规建议。" }
+                ];
+
+                const content = [{ type: "text", text: prompt }];
+                attachments.forEach(item => {
+                    if (item.type.startsWith('image/')) {
+                        content.push({ type: "image_url", image_url: { url: item.data } });
+                    }
+                });
+
+                messages.push({ role: "user", content: content });
+
+                const response = await fetch(CONFIG.ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CONFIG.API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: CONFIG.MODEL_ID,
+                        messages: messages,
+                        temperature: 0.3
+                    }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeout);
+
+                if (!response.ok) {
+                    let errorMsg = `HTTP 错误 ${response.status}`;
+                    try {
+                        const errData = await response.json();
+                        if (response.status === 402 || errData.error?.code === 'insufficient_balance') {
+                            errorMsg = "API 余额不足，请检查账号充值状态";
+                        } else if (response.status === 429) {
+                            errorMsg = "请求过快，请稍后再试";
+                        } else {
+                            errorMsg = errData.error?.message || errorMsg;
+                        }
+                    } catch (e) {}
+                    throw new Error(errorMsg);
+                }
+
+                const result = await response.json();
+                return result.choices[0].message.content;
+
+            } catch (err) {
+                clearTimeout(timeout);
+                if ((err.name === 'AbortError' || err.message.includes('timeout')) && retryCount < CONFIG.MAX_RETRY) {
+                    console.log(`正在进行第 ${retryCount + 1} 次重试...`);
+                    return await callDoubao(prompt, attachments, retryCount + 1);
+                }
+                if (err.name === 'AbortError') throw new Error("请求超时，模型处理图片时间过长，请尝试减少图片数量");
+                throw err;
+            }
+        }
+
+        async function runTask(type) {
+            const facts = document.getElementById('facts').value.trim();
+            if (!facts) return showToast("请先输入客诉描述事实", "warning");
+
+            const btnId = type === 'PLAN' ? 'btnPlan' : 'btnReply';
+            const outputId = type === 'PLAN' ? 'outPlan' : 'outReply';
+            const outputEl = document.getElementById(outputId);
+
+            toggleLoading(btnId, true);
+            
+            // 风格化进度条
+            outputEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full space-y-6 p-8">
+                    <div class="w-full max-w-[200px] relative">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-xs font-bold text-[#4318FF] uppercase tracking-wider">AI Thinking</span>
+                            <span class="text-xs font-bold text-[#4318FF]" id="progress-text">0%</span>
+                        </div>
+                        <div class="w-full bg-[#F4F7FE] rounded-full h-3 overflow-hidden">
+                            <div id="progress-bar" class="bg-gradient-to-r from-[#868CFF] to-[#4318FF] h-3 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(67,24,255,0.4)]" style="width: 0%"></div>
+                        </div>
+                        <p class="text-xs text-[#A3AED0] mt-3 text-center font-medium animate-pulse">
+                            正在深度识别风险点与法律条款...
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            startProgressBar();
+
+            try {
+                let prompt = "";
+                if (type === 'PLAN') {
+                    prompt = `【事实描述】：${facts}\n\n请作为专家提供内部应对思路：1.性质判定；2.证据力分析；3.赔付建议；4.话术要点。`;
+                } else {
+                    const planText = document.getElementById('outPlan').innerText;
+                    prompt = `【参考策略】：${planText}\n\n请起草正式的对外答复书。要求语气严谨专业。`;
+                }
+
+                const response = await callDoubao(prompt, uploadedFiles);
+                
+                stopProgressBar();
+                await new Promise(r => setTimeout(r, 400));
+
+                outputEl.textContent = response;
+                showToast("生成成功", "success");
+            } catch (err) {
+                stopProgressBar();
+                outputEl.innerHTML = `<div class="h-full flex items-center justify-center"><span class="text-[#E02020] font-bold bg-[#FFEAEA] px-4 py-2 rounded-xl">生成失败：${err.message}</span></div>`;
+                showToast(err.message, "error");
+            } finally {
+                toggleLoading(btnId, false);
+            }
+        }
+
+        function startProgressBar() {
+            if (progressInterval) clearInterval(progressInterval);
+            let width = 0;
+            const bar = document.getElementById('progress-bar');
+            const text = document.getElementById('progress-text');
+
+            if (!bar || !text) return;
+
+            progressInterval = setInterval(() => {
+                if (width < 30) width += Math.random() * 8;
+                else if (width < 70) width += Math.random() * 4;
+                else if (width < 95) width += Math.random() * 1;
+                else if (width < 99) width += 0.05;
+
+                if (width > 99.5) width = 99.5;
+                
+                bar.style.width = width + '%';
+                text.innerText = Math.floor(width) + '%';
+            }, 300);
+        }
+
+        function stopProgressBar() {
+            if (progressInterval) clearInterval(progressInterval);
+            const bar = document.getElementById('progress-bar');
+            const text = document.getElementById('progress-text');
+            if (bar) bar.style.width = '100%';
+            if (text) text.innerText = '100%';
+        }
+
+        function toggleLoading(btnId, isLoading) {
+            const btn = document.getElementById(btnId);
+            const text = btn.querySelector('.btn-text');
+            const icon = btn.querySelector('.loading-icon');
+            btn.disabled = isLoading;
+            if (isLoading) {
+                text.style.opacity = '0';
+                icon.classList.remove('hidden');
+                updateStatus('AI 分析中', true);
+            } else {
+                text.style.opacity = '1';
+                icon.classList.add('hidden');
+                updateStatus('系统就绪', false);
+            }
+        }
+
+        function updateStatus(msg, isBusy) {
+            document.getElementById('statusText').innerText = msg;
+            const ping = document.getElementById('statusPing');
+            const dot = document.getElementById('statusDot');
+            
+            if (isBusy) {
+                ping.classList.remove('hidden');
+                dot.className = "relative inline-flex rounded-full h-3 w-3 bg-blue-500";
+                document.getElementById('statusText').className = "text-xs font-bold text-[#4318FF]";
+            } else {
+                ping.classList.add('hidden');
+                dot.className = "relative inline-flex rounded-full h-3 w-3 bg-[#05CD99]";
+                document.getElementById('statusText').className = "text-xs font-bold text-[#A3AED0]";
+            }
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            
+            let icon = '';
+            if (type === 'success') icon = '<svg class="w-5 h-5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+            else if (type === 'error') icon = '<svg class="w-5 h-5 text-[#FF5B5B]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
+            else icon = '<svg class="w-5 h-5 text-[#FFB547]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+
+            t.innerHTML = `${icon}<span>${msg}</span>`;
+            
+            t.classList.replace('-translate-y-40', 'translate-y-8');
+            t.classList.replace('opacity-0', 'opacity-100');
+
+            setTimeout(() => {
+                t.classList.replace('translate-y-8', '-translate-y-40');
+                t.classList.replace('opacity-100', 'opacity-0');
+            }, 3000);
+        }
+
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function copyToClipboard(id) {
+            const text = document.getElementById(id).innerText;
+            if (!text || text.includes('等待生成')) return showToast("暂无内容可复制", "warning");
+            navigator.clipboard.writeText(text).then(() => showToast("已复制到剪贴板", "success"));
+        }
+
+        function resetAll() {
+            if (!confirm("确定要清空所有内容吗？")) return;
+            document.getElementById('facts').value = '';
+            document.getElementById('outPlan').innerText = '';
+            document.getElementById('outReply').innerText = '';
+            uploadedFiles = [];
+            renderPreviews();
+            renderPlaceholders();
+            showToast("已重置", "success");
+        }
+
+        function renderPlaceholders() {
+            document.querySelectorAll('[data-placeholder]').forEach(el => {
+                if (!el.textContent.trim()) {
+                    el.innerHTML = `<div class="flex items-center justify-center h-full text-[#A3AED0] italic text-xs">${el.dataset.placeholder}</div>`;
+                }
+            });
+        }
+
+        function exportToDoc() {
+            const content = document.getElementById('outReply').innerText;
+            if (content.length < 20) return showToast("内容过短，无法导出", "warning");
+            const blob = new Blob(['\ufeff' + content], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `答复函_${Date.now()}.doc`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
